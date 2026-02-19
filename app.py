@@ -1,7 +1,8 @@
 from flask import Flask
-from configuration import db, SECRET_KEY
+from configuration import db, SECRET_KEY, loginManager
 # blueprint imports
 from routes.root import rootBp
+from routes.account import accountBp
 """app = Flask(__name__)
 app.register_blueprint(rootBp)"""
 
@@ -9,10 +10,14 @@ app.register_blueprint(rootBp)"""
 def create_app():
     app = Flask(__name__)
     app.secret_key = SECRET_KEY
-    app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///cs139.db"
+    app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///cs139db.sqlite3"
+    db.init_app(app)
+    loginManager.init_app(app)
+    loginManager.login_view = "account.login"
     app.register_blueprint(rootBp)
+    app.register_blueprint(accountBp)
     with app.app_context():
-        db.init_app(app)
+        db.create_all()
 
     return app
 

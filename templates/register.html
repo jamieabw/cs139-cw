@@ -7,9 +7,13 @@
 <form name="loginForm" method="POST">
     <label>Username</label>
     <input type="text" name="username">
+    <label>Email</label>
+    <input type="email" name="email">
     <label>Password</label>
     <input type="password" name="password">
     <input type="submit">
+
 </form>
-<a href="{{url_for('account.register')}}">Register account</a>
+<a href="{{url_for('account.login')}}">Login to account</a>
+
 {% endblock %}
