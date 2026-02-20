@@ -9,10 +9,10 @@
         {% endblock %}
     </head>
     <body class="container">
-        <nav class="container-fluid">
+        <nav class="nav">
             <h1>Digital Bill Splitter Deluxe</h1>
-            <button>Add Group</button>
-            <button>Account</button>
+            <a href="#"><button>Add Group</button></a>
+            <a href="{{url_for('account.manage')}}"><button>Account</button></a>
         </nav>
         {% block content %}
         {% endblock %}
