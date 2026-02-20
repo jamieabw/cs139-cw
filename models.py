@@ -14,10 +14,10 @@ class Users(db.Model, UserMixin):
         self.email = email
         self.password = password
 
-class Groups(db.Model):
+"""class Groups(db.Model):
     id = db.Column("id", db.Integer(), primary_key=True)
     # will also have name, password for the group,
 
 class GroupMembers(db.Model):
     ...
-    # will have user name, group member, or maybe user id and group id whatever
+    # will have user name, group member, or maybe user id and group id whatever"""

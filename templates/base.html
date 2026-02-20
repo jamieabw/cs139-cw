@@ -8,8 +8,12 @@
         {% block head %}
         {% endblock %}
     </head>
-    <body>
-        <h1> initial block</h1>
+    <body class="container">
+        <nav class="container-fluid">
+            <h1>Digital Bill Splitter Deluxe</h1>
+            <button>Add Group</button>
+            <button>Account</button>
+        </nav>
         {% block content %}
         {% endblock %}
         <script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
