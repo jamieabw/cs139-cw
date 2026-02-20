@@ -2,4 +2,15 @@
 {% block head %}
 {% endblock %}
 {% block content %}
+<h2>Groups</h2>
+{% if groups|length == 0 %}
+    <p>Sorry, there are no groups to display.</p>
+{% else %}
+    {% for group in groups %}
+    <div class="border-2px">
+        <p>{{group.name}}</p>
+    </div>
+    {% endfor %}
+{% endif %}
+
 {% endblock %}

@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block head %}
+{% endblock %}
+
+{% block content %}
+<h2>Create group</h2>
+<form method="POST">
+    <label>Group name</label>
+    <input name="groupName" type="text">
+    <label>Group password</label>
+    <input name="groupPassword", type="password">
+    <input type="submit">
+</form>
+{% endblock %}

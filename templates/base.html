@@ -11,8 +11,12 @@
     <body class="container">
         <nav class="nav">
             <h1>Digital Bill Splitter Deluxe</h1>
-            <a href="#"><button>Add Group</button></a>
-            <a href="{{url_for('account.manage')}}"><button>Account</button></a>
+            <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown">Add Group</button>
+            <ul class="dropdown-menu">
+                <li><a class="dropdown-item" href="{{url_for('root.createGroup')}}">Create group</a></li>
+                <li><a class="dropdown-item" href="{{url_for('root.joinGroup')}}">Join group</a></li>
+            </ul>
+            <button action="#">Account</button>
         </nav>
         {% block content %}
         {% endblock %}
