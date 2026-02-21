@@ -1,0 +1,13 @@
+body {
+    color: whitesmoke;
+    background-color: rgb(50, 50, 50);
+}
+
+a {
+    color: whitesmoke;
+    text-decoration: none;
+}
+
+.groupContainer {
+    background-color: whitesmoke;
+}

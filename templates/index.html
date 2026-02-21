@@ -6,11 +6,14 @@
 {% if groups|length == 0 %}
     <p>Sorry, there are no groups to display.</p>
 {% else %}
+    <div class="container flex">
     {% for group in groups %}
-    <div class="border-2px">
-        <p>{{group.name}}</p>
-    </div>
+        <div class="d-inline col-md border 3-p groupContainer">
+            <a href="{{url_for('group.groupPage', id=group.id)}}"><p class="text-center">{{group.name}}</p></a>
+        </div>
+
     {% endfor %}
+    </div>
 {% endif %}
 
 {% endblock %}

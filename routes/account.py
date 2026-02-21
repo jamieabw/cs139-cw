@@ -3,6 +3,7 @@ from flask_login import login_user, logout_user, current_user, login_required
 from werkzeug import security
 from configuration import db, loginManager
 from models import Users
+from forms import RegisterForm, LoginForm
 
 accountBp = Blueprint("account", __name__, url_prefix="/account")
 
@@ -12,8 +13,8 @@ def loadUser(userId):
 
 @accountBp.route("/register", methods=["GET", "POST"])
 def register():
-    if request.method == "GET":
-        return render_template("register.html")
+    """if request.method == "GET":
+        return render_template("register.html", form=registerForm())
     elif request.method == "POST": # if the form has been submitted, get the values and store them in the db
         username = request.form["username"]
         email = request.form["email"]
@@ -27,16 +28,32 @@ def register():
         except Exception:
             db.session.rollback()
             # flash a message here when you figure that out, for now just redirect back to register
-            return redirect(url_for(".register"))
+            return render_template("register.html", form=registerForm())
+        return redirect(url_for("root.index"))"""
+    form = RegisterForm()
+    if form.validate_on_submit():
+        username = form.username.data
+        email = form.email.data
+        password = security.generate_password_hash(form.password.data)
+        try:
+            db.session.add(Users(username, email, password))
+            db.session.commit()
+            userFound = Users.query.filter_by(username=request.form["username"]).first()
+            login_user(loadUser(userFound.id))
+        except Exception:
+            db.session.rollback()
+            return render_template("register.html", form=form)
         return redirect(url_for("root.index"))
+    return render_template("register.html", form=form)
+
     
 
 @accountBp.route("/login", methods=["GET", "POST"])
 def login():
-    if request.method == "GET":
+    """if request.method == "GET":
         if current_user:
             redirect(url_for("root.index"))
-        return render_template("login.html")
+        return render_template("login.html", form=loginForm())
     elif request.method == "POST":
         userFound = Users.query.filter_by(username=request.form["username"]).first()
         if userFound and security.check_password_hash(userFound.password, request.form["password"]):
@@ -45,13 +62,24 @@ def login():
             return redirect(url_for("root.index"))
         else:
             # flash an incorrect details message
-            return render_template("login.html")
-
+            return render_template("login.html", form=loginForm())"""
+    form = LoginForm()
+    if form.validate_on_submit():
+        userFound = Users.query.filter_by(username=form.username.data).first()
+        if userFound and security.check_password_hash(userFound.password, form.password.data):
+            login_user(loadUser(userFound.id))
+            return redirect(url_for("root.index"))
+    return render_template("login.html", form=form)
 
 @accountBp.route("/manage")
 @login_required
 def manage():
     return render_template("manageAccount.html")
+
+@accountBp.route("/debts")
+@login_required
+def debts():
+    return render_template("debts.html")
 
 
 @accountBp.route("/logout")

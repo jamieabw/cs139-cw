@@ -10,8 +10,8 @@ rootBp = Blueprint("root", __name__, url_prefix="")
 def index():
     usersGroups = []
     for group in GroupMembers.query.filter_by(userId=current_user.id):
-        print(Groups.query.filter_by(id=group.id).first().name) # temp
-        usersGroups.append(Groups.query.filter_by(id=group.id).first())
+        print(Groups.query.filter_by(id=group.groupId).first().name) # temp
+        usersGroups.append(Groups.query.filter_by(id=group.groupId).first())
     return render_template("index.html", groups=usersGroups)
 
 # these two group creation and join routes are temporary, they will be replaced with a pop up form.
@@ -30,12 +30,33 @@ def createGroup():
             db.session.commit()
             print("group added!")
             return redirect(url_for(".index"))
-        except Exception:
+        except Exception as e:
+            print(e)
             db.session.rollback()
             return render_template("createGroupTemp.html")
 
 
-@rootBp.route("/joinGroup")
+@rootBp.route("/joinGroup", methods=["GET", "POST"])
 @login_required
 def joinGroup():
-    return render_template("joinGroupTemp.html")
+    if request.method == "GET":
+        return render_template("joinGroupTemp.html")
+    else:
+        try:
+            group = Groups.query.filter_by(name=request.form["groupName"]).first()
+            if group:
+                password = request.form["groupPassword"]
+                if security.check_password_hash(group.groupPassword, password):
+                    db.session.add(GroupMembers(current_user.id, group.id))
+                    db.session.commit()
+                    print("user added")
+                    return redirect(url_for(".joinGroup"))
+            else:
+                print("no gorup")
+                return render_template("joinGroupTemp.html")
+        except Exception as e:
+            print("cant add")
+            print(e)
+            db.session.rollback()
+            return render_template("joinGroupTemp.html")
+        

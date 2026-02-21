@@ -3,10 +3,12 @@ from configuration import db, SECRET_KEY, loginManager
 # blueprint imports
 from routes.root import rootBp
 from routes.account import accountBp
+from routes.group import groupBp
 """app = Flask(__name__)
 app.register_blueprint(rootBp)"""
 
-# instantiates the flask app, registers the required blueprints
+"""instantiates the flask app, registers the required blueprints, registers configurations.
+"""
 def create_app():
     app = Flask(__name__)
     app.secret_key = SECRET_KEY
@@ -16,13 +18,10 @@ def create_app():
     loginManager.login_view = "account.login"
     app.register_blueprint(rootBp)
     app.register_blueprint(accountBp)
+    app.register_blueprint(groupBp)
     with app.app_context():
         db.create_all()
 
     return app
 
-
-
-### SERVER CODE (python, flask, jinja, flask-sqlalchemy, etc.)
-#route to the index
 

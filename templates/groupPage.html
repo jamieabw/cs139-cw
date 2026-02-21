@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+{% block head %}
+{% endblock %}
+
+{% block content %}
+<h2>{{group.name}}</h2>
+<hr>
+<p>Description: {{group.name}}</p>
+<p>Created: {{group.createdAt}}</p>
+<hr>
+<button type="button" data-bs-toggle="modal" data-bs-target="#createBill">Create new bill</button>
+<hr>
+<h3>Current bills</h3>
+<div class="grid">
+    <div class="row">
+        <div class="col"><p>Description</p></div>
+        <div class="col"><p>Cost</p></div>
+        <div class="col"><p>Created by</p></div>
+    </div>
+    <div class="row">
+        <div class="col"><p>placeholder</p></div>
+        <div class="col"><p>placeholder</p></div>
+        <div class="col"><p>placeholder</p></div>
+    </div>
+</div>
+<hr>
+
+<h3>Previous bills</h3>
+<div>
+    <div class="row">
+        <div class="col"><p>Description</p></div>
+        <div class="col"><p>Cost</p></div>
+        <div class="col"><p>Created by</p></div>
+    </div>
+    <div class="row">
+        <div class="col"><p>placeholder</p></div>
+        <div class="col"><p>placeholder</p></div>
+        <div class="col"><p>placeholder</p></div>
+    </div>
+</div>
+
+<div class="modal fade" id="createBill" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+
+                <div class="modal-header">
+                    <h5 class="modal-title">New bill</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+
+                <div class="modal-body">
+                    <form method="POST">
+                        {{form.hidden_tag()}}
+                        <div>
+                            {{form.description.label}}
+                            {{form.description()}}
+                            {% for error in form.description.errors %}
+                                <p style="color:red">{{ error }}</p>
+                            {% endfor %}
+                            {{form.amount.label}}
+                            {{form.amount()}}
+                            {% for error in form.amount.errors %}
+                                <p style="color:red">{{ error }}</p>
+                            {% endfor %}                          
+                        </div>
+                        {{form.submit()}}
+
+                    </form>
+                </div>
+
+                </div>
+            </div>
+        </div>
+{% endblock %}
