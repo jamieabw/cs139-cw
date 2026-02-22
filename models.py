@@ -47,39 +47,56 @@ class GroupMembers(db.Model):
 
 class Bills(db.Model):
     id = db.Column("id", db.Integer(), primary_key=True)
-    createdUserId = db.Column("userId", db.Integer(), nullable=False)
-    description = db.Column("description", db.String(300))
+    creatorId = db.Column("creatorId", db.ForeignKey("users.id"), nullable=False)
+    groupId = db.Column("groupId", db.ForeignKey("groups.id"), nullable=False)
+    description = db.Column("description", db.String(250))
+    total = db.Column("total", db.Numeric(8,2), nullable=False)
     createdAt = db.Column("createdAt", db.DateTime, nullable=False)
+    group = db.relationship("Groups", foreign_keys=[groupId])
+    creator = db.relationship("Users", foreign_keys=[creatorId])
 
-    def __init__(self, createdUserId, description):
-        self.createdUserId = createdUserId
+    def __init__(self, creatorId, groupId, description, total):
+        self.creatorId = creatorId
+        self.groupId = groupId
         self.description = description
+        self.total = total
         self.createdAt = datetime.now()
 
 class Payments(db.Model):
     id = db.Column("id", db.Integer(), primary_key=True)
-    userId = db.Column("userId", db.Integer(), nullable=False)
-    createdAt = db.Column("createdAt", db.DateTime, nullable=False)
-    billId = db.Column("billId", db.Integer(), nullable=False)
+    billId = db.Column("billId", db.ForeignKey("bills.id"), nullable=False)
+    payerId = db.Column("payerId", db.ForeignKey("users.id"), nullable=False)
+    payeeId = db.Column("payeeId", db.ForeignKey("users.id"), nullable=False)
     amount = db.Column("amount", db.Numeric(8,2), nullable=False)
+    createdAt = db.Column("createdAt", db.DateTime, nullable=False)
+    evidence = db.Column("evidence", db.LargeBinary, nullable=True) # temp
+    status = db.Column("status", db.String(15)) # pending, acknowledged, rejected
 
-    def __init__(self, userId, billId, amount):
-        self.userId = userId
+    def __init__(self, billId, payerId, payeeId, amount, evidence):
         self.billId = billId
+        self.payerId = payerId
+        self.payeeId = payeeId
         self.amount = amount
+        self.evidence = evidence
+        self.status = "pending"
         self.createdAt = datetime.now()
 
 
 
 class Debtors(db.Model):
-    id = db.Column("id", db.Integer(), primary_key=True)
-    userId = db.Column("userId", db.Integer(), nullable=False)
+    billId = db.Column("billId", db.ForeignKey("bills.id"), primary_key=True)
+    userId = db.Column("userId", db.ForeignKey("users.id"), primary_key=True)
+    proportion = db.Column("proportion", db.Numeric(3, 2))
+    owed = db.Column("owed", db.Numeric(8,2))
     createdAt = db.Column("createdAt", db.DateTime, nullable=False)
-    amount = db.Column("amount", db.Numeric(8,2), nullable=False)
+    bill = db.relationship("Bills", foreign_keys=[billId])
+    user = db.relationship("Users", foreign_keys=[userId])
 
-    def __init__(self, userId,  amount): # could use the billId here isntead of the amount , but unsure for now
+    def __init__(self, billId, userId, proportion, owed):
+        self.billId = billId
         self.userId = userId
-        self.amount = amount
+        self.proportion = proportion
+        self.owed = owed
         self.createdAt = datetime.now()
 
 

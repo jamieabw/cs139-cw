@@ -32,10 +32,12 @@ def groupPage(id: int):
             """NOTE:
             THIS IS TEMPORARY PLACEHOLDER!!!!
             """
-            db.session.add(Bills(current_user.id, desc))
+            newBill = Bills(current_user.id, id, desc, amount)
+            db.session.add(newBill)
+            numMembers = len(GroupMembers.query.filter_by(groupId=id).all())
             for userMember in GroupMembers.query.filter_by(groupId=id):
                 userId = userMember.userId
-                db.session.add(Debtors(userId, amount))
+                db.session.add(Debtors(newBill.id, userId, 100 / numMembers, amount / numMembers))
             db.session.commit()
             print("success")
         except Exception as e:

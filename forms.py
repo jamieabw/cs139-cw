@@ -1,11 +1,17 @@
 from flask_wtf import FlaskForm
 from wtforms import StringField, SubmitField, EmailField, PasswordField, DecimalField
-from wtforms.validators import DataRequired, Length
+from wtforms.validators import DataRequired, Length, ValidationError
+from models import Groups, Users
 
 class CreateGroupForm(FlaskForm):
     groupName = StringField("Group name", validators=[DataRequired(), Length(max=50)])
     groupPassword = PasswordField("Group password", validators=[DataRequired(), Length(max=50)])
     submit = SubmitField("Create")
+
+    def validate_groupName(self, groupName):
+        nameToCheck = Groups.query.filter_by(name=groupName.data).first()
+        if nameToCheck:
+            raise ValidationError("Group name is already taken.")
 
 class JoinGroupForm(FlaskForm):
     groupName = StringField("Group name", validators=[DataRequired(), Length(max=50)])
@@ -18,10 +24,20 @@ class RegisterForm(FlaskForm):
     password = PasswordField("Password", validators=[DataRequired(), Length(max=50)])
     submit = SubmitField("Register")
 
+    def validate_username(self, username):
+        nameToCheck = Users.query.filter_by(username=username.data).first()
+        if nameToCheck:
+            raise ValidationError("Username is already taken.")
+
 class LoginForm(FlaskForm):
     username = StringField("Username", validators=[DataRequired(), Length(max=50)])
     password = PasswordField("Password", validators=[DataRequired(), Length(max=50)])
     submit = SubmitField("Login")
+
+    def validate_username(self, username):
+        nameToCheck = Users.query.filter_by(username=username.data).first()
+        if not nameToCheck:
+            raise ValidationError("User credentials do not match.")
 
 class CreateBillForm(FlaskForm):
     amount = DecimalField("Amount", validators=[DataRequired()])

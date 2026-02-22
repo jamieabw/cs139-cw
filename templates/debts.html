@@ -9,22 +9,27 @@
         <div class="col"><p>Description</p></div>
         <div class="col"><p>Total owed</p></div>
         <div class="col"><p>What you owe</p></div>
-        <div class="col"><p>What you've paid</p></div>
+        <div class="col"><p>Group</p></div>
         <div class="col"><p>Created by</p></div>
         <div class="col"></div>
     </div>
+    {% for debt in debts %}
     <div class="row">
-        <div class="col"><p>placeholder</p></div>
-        <div class="col"><p>placeholder</p></div>
-        <div class="col"><p>placeholder</p></div>
-        <div class="col"><p>placeholder</p></div>
-        <div class="col"><p>placeholder</p></div>
+        <div class="col"><p>{{debt.bill.description}}</p></div>
+        <div class="col"><p>{{debt.bill.total}}</p></div>
+        <div class="col"><p>{{debt.owed}}</p></div>
+        <div class="col"><p>{{debt.bill.group.name}}</p></div>
+        <div class="col"><p>{{debt.bill.creator.username}}</p></div>
         <div class="col"><button>Pay</button></div>
     </div>
+    {% endfor %}
 </div>
 <hr>
 
 <h3>Your previous debts</h3>
 <div>
+    {% for debt in debts %}
+    
+    {% endfor %}
 </div>
 {% endblock %}
