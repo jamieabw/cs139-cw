@@ -1,6 +1,7 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, SubmitField, EmailField, PasswordField, DecimalField
+from wtforms import StringField, SubmitField, EmailField, PasswordField, DecimalField, FileField, HiddenField
 from wtforms.validators import DataRequired, Length, ValidationError
+from flask_wtf.file import file_required, file_allowed
 from models import Groups, Users
 
 class CreateGroupForm(FlaskForm):
@@ -43,3 +44,12 @@ class CreateBillForm(FlaskForm):
     amount = DecimalField("Amount", validators=[DataRequired()])
     description = StringField("Description", validators=[DataRequired(), Length(max=300)])
     submit = SubmitField("Create bill")
+
+class SettleDebtForm(FlaskForm):
+    billId = HiddenField()
+    userId = HiddenField()
+    evidence = FileField("Evidence", validators=[file_required(), file_allowed({"jpg", "png"}, "Evidence must be an image.")])
+    submit = SubmitField("Send settle request")
+
+class updateAccountDetailsForm(FlaskForm):
+    ... # form for updating account details

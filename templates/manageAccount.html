@@ -3,6 +3,14 @@
 {% endblock %}
 
 {% block content %}
-<p>Hello, {{current_user.username}}</p>
+<h2>Account</h2>
+<hr>
+<h3>Account details:</h3>
+<p>Username: {{current_user.username}}</p>
+<p>Email: {{current_user.email}}</p>
+<p>Created: {{current_user.createdAt}}</p>
+<hr>
+<h3>Change password</h3>
+<hr>
 <a href="{{url_for('account.logout')}}"><button>Logout</button></a>
 {% endblock %}

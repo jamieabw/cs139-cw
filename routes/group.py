@@ -2,7 +2,7 @@ from flask import Blueprint, render_template, redirect, url_for, request
 from flask_login import login_required, current_user
 from werkzeug import security
 from configuration import db
-from models import Groups, GroupMembers, Bills, Debtors
+from models import Groups, GroupMembers, Bills, Debtors, Payments
 from forms import CreateBillForm
 
 groupBp = Blueprint("group", __name__, url_prefix="/group")
@@ -15,14 +15,6 @@ and if they do, allows them to view the group page, allows dynamic group page lo
 @groupBp.route("/<int:id>", methods=["GET", "POST"])
 @login_required
 def groupPage(id: int):
-    """if request.method == "GET":
-        group = Groups.query.get_or_404(id)
-        for groupMember in GroupMembers.query.filter_by(groupId=id):
-            if groupMember.userId == current_user.id:
-                return render_template("groupPage.html", group=group, form = CreateBillForm())
-        return redirect(url_for("root.joinGroup"))
-    else:
-        ... # create new bill or something"""
     form = CreateBillForm()
     group = Groups.query.get_or_404(id)
     if form.validate_on_submit():
@@ -45,8 +37,23 @@ def groupPage(id: int):
              db.session.rollback()
     for groupMember in GroupMembers.query.filter_by(groupId=id):
             if groupMember.userId == current_user.id:
-                return render_template("groupPage.html", group=group, form=form)
+                return render_template("groupPage.html", group=group, form=form, bills=Bills.query.filter_by(groupId=id).all())
     return redirect(url_for("root.joinGroup"))
+
+
+@groupBp.route("/<int:groupId>/bill/<int:billId>", methods=["GET", "POST"])
+@login_required
+def groupBillPage(groupId: int, billId: int):
+    bill = Bills.query.filter_by(id=billId).first_or_404()
+    if bill.groupId != groupId:
+         return "404"#redirect(url_for("root.joinGroup"))
+    for groupMember in GroupMembers.query.filter_by(groupId=groupId):
+            if groupMember.userId == current_user.id:
+                debtors = Debtors.query.filter_by(billId=billId).all()
+                payments = Payments.query.filter_by(billId = billId).all()
+                return render_template("groupBill.html", bill=bill, debtors=debtors, payments=payments)
+    return redirect(url_for("root.joinGroup"))
+
 """
 @groupBp.route("/<int:id>/delete")
 @login_required

@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block head %}
+{% endblock %}
+
+{% block content %}
+<p>{{bill.id}}</p>
+
+<h2>Bill split</h2>
+<hr>
+<div class="grid">
+    <div class="row">
+        <div class="col">Name</div>
+        <div class="col">Proportion</div>
+        <div class="col">Owed</div>
+    </div>
+
+    {% for debtor in debtors %}
+        <div class="row">
+            <div class="col">{{debtor.user.username}}</div>
+            <div class="col">{{debtor.proportion}}%</div>
+            <div class="col">£{{debtor.owed}}</div>
+        </div>
+    {% endfor %}
+    <button>Edit bill</button>
+
+</div>
+
+<h2>Payments</h2>
+<hr>
+<div class="grid">
+    <div class="row">
+        <div class="col">Name</div>
+        <div class="col">Paid</div>
+        <div class="col">Evidence</div>
+        <div class="col">Status</div>
+    </div>
+    {% for payment in payments %}
+        <div class="row">
+            <div class="col">{{payment.user.username}}</div>
+            <div class="col">{{payment.amount}}</div>
+            <div class="col">Evidence</div>
+            <div class="col">{{payment.status}}</div>
+            {% if payment.status != "settled" and current_user == payment.bill.creator %}
+                <div class="row"><button>Acknowledge</button></div>
+                <div class="row"><button>Reject</button></div>
+            {% endif %}
+        </div>
+    {% endfor %}
+
+</div>
+{% endblock %}

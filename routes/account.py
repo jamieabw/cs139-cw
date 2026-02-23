@@ -2,8 +2,8 @@ from flask import Blueprint, render_template, request, redirect, url_for
 from flask_login import login_user, logout_user, current_user, login_required
 from werkzeug import security
 from configuration import db, loginManager
-from models import Users, Debtors
-from forms import RegisterForm, LoginForm
+from models import Users, Debtors, Payments
+from forms import RegisterForm, LoginForm, SettleDebtForm
 
 accountBp = Blueprint("account", __name__, url_prefix="/account")
 
@@ -42,10 +42,23 @@ def login():
 def manage():
     return render_template("manageAccount.html")
 
-@accountBp.route("/debts")
+@accountBp.route("/debts", methods=["GET", "POST"])
 @login_required
 def debts():
-    return render_template("debts.html", debts=Debtors.query.filter_by(userId=current_user.id).all())
+    form = SettleDebtForm()
+    if form.validate_on_submit(): # the issue here is figuring out which user is doing their debt, but i may be a retard and have just figured it out from typing this
+        debt = db.session.get(Debtors, int(form.debtId.data))
+        # maybe current_user can be implemented here??, no javascript is definitely needed
+        evidence = form.evidence.data
+        payerId = current_user.id 
+        payeeId = debt.bill.creator.id
+        amount = debt.owed
+        billId = debt.bill.id
+        db.session.add(Payments(billId, payerId, payeeId, amount, evidence))
+        db.session.commit()
+
+    
+    return render_template("debts.html", debts=Debtors.query.filter_by(userId=current_user.id).all(), form=form)
 
 
 @accountBp.route("/logout")
