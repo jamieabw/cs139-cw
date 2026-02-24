@@ -54,11 +54,3 @@ def groupBillPage(groupId: int, billId: int):
                 return render_template("groupBill.html", bill=bill, debtors=debtors, payments=payments)
     return redirect(url_for("root.joinGroup"))
 
-"""
-@groupBp.route("/<int:id>/delete")
-@login_required
-def groupPage(id: int):
-    group = Groups.query.get_or_404(id)
-    for groupMember in GroupMembers.query.filter_by(groupId=id):
-        if groupMember.userId == current_user.id:
-            ... # eventually can delete a group"""

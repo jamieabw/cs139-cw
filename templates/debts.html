@@ -4,7 +4,7 @@
 
 {% block content %}
 <h3>Your current debts</h3>
-<div class="grid">
+<div class="grid debtsGrid">
     <div class="row">
         <div class="col"><p>Description</p></div>
         <div class="col"><p>Total owed</p></div>
@@ -14,6 +14,7 @@
         <div class="col"></div>
     </div>
     {% for debt in debts %}
+    {% set status = debtStatuses.get(debt.billId) %}
     <div class="row">
         <div class="col"><p>{{debt.bill.description}}</p></div>
         <div class="col"><p>{{debt.bill.total}}</p></div>
@@ -24,8 +25,13 @@
         {% else %}
             <div class="col"><p>{{debt.bill.creator.username}}</p></div>
         {% endif %}
-        <!--this is a temp bit here, js is prolly needded-->
-        <div class="col"><button type="button" data-bs-toggle="modal" data-bs-target="#settleDebt" data-bs-billId="{{debt.billId}}">Settle</button></div>
+        {% if status == "pending" %}
+            <div class="col">{{status}}</div>
+        {% elif status == "acknowledged" %}
+        <div class="col"></div>
+        {% else %}
+            <div class="col"><button type="button" data-bs-toggle="modal" data-bs-target="#settleDebt" data-bill-id="{{debt.billId}}">Settle</button></div>
+        {% endif %}
     </div>
     {% endfor %}
 </div>
@@ -48,7 +54,7 @@
                 </div>
 
                 <div class="modal-body">
-                    <form method="POST">
+                    <form method="POST" enctype="multipart/form-data">
                         {{form.hidden_tag()}}
                         <div>
                             {{form.billId}}
@@ -66,4 +72,5 @@
                 </div>
             </div>
         </div>
+<script src="{{url_for('static', filename='js/main.js')}}"></script>
 {% endblock %}

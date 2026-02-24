@@ -46,19 +46,25 @@ def manage():
 @login_required
 def debts():
     form = SettleDebtForm()
+    debtStatuses = {}
+    for payment in Payments.query.filter_by(payerId=current_user.id).all():
+        debtStatuses[payment.billId] = payment.status
+    print(debtStatuses)
     if form.validate_on_submit(): # the issue here is figuring out which user is doing their debt, but i may be a retard and have just figured it out from typing this
-        debt = db.session.get(Debtors, int(form.debtId.data))
+        debt = db.session.get(Debtors, (int(form.billId.data), current_user.id))
         # maybe current_user can be implemented here??, no javascript is definitely needed
-        evidence = form.evidence.data
+        evidence = form.evidence.data.read()
         payerId = current_user.id 
         payeeId = debt.bill.creator.id
         amount = debt.owed
         billId = debt.bill.id
         db.session.add(Payments(billId, payerId, payeeId, amount, evidence))
         db.session.commit()
+        return redirect(url_for(".debts"))
 
     
-    return render_template("debts.html", debts=Debtors.query.filter_by(userId=current_user.id).all(), form=form)
+    return render_template("debts.html", debts=Debtors.query.filter_by(userId=current_user.id).all(), form=form, \
+                           debtStatuses=debtStatuses)
 
 
 @accountBp.route("/logout")

@@ -46,8 +46,7 @@ class CreateBillForm(FlaskForm):
     submit = SubmitField("Create bill")
 
 class SettleDebtForm(FlaskForm):
-    billId = HiddenField()
-    userId = HiddenField()
+    billId = HiddenField(render_kw={"id": "billId"})
     evidence = FileField("Evidence", validators=[file_required(), file_allowed({"jpg", "png"}, "Evidence must be an image.")])
     submit = SubmitField("Send settle request")
 
