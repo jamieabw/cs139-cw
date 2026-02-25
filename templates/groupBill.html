@@ -22,7 +22,7 @@
         </div>
     {% endfor %}
     {% if current_user == bill.creator %}
-        <button>Edit bill</button> <!--ajax will be used to do this,
+        <button type="button" data-bs-toggle="modal" data-bs-target="#editBill">Edit bill</button> <!--ajax will be used to do this,
         - opens modal
         - pre fills fields with existing data
         - if you do change, all existing payments are removed and all debtors remarked as unpad
@@ -55,25 +55,29 @@
 
 </div>
 
-<div class="modal fade" id="settleDebt" tabindex="-1" aria-hidden="true">
+<div class="modal fade" id="editBill" tabindex="-1" aria-hidden="true">
             <div class="modal-dialog">
                 <div class="modal-content">
 
                 <div class="modal-header">
-                    <h5 class="modal-title">Settle debt</h5>
+                    <h5 class="modal-title">Edit bill</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
 
                 <div class="modal-body">
-                    <form method="POST" enctype="multipart/form-data">
+                    <form id="editBillForm" method="POST" action="{{ url_for('group.editBill', groupId=bill.groupId, billId=bill.id) }}"></form>>
                         {{form.hidden_tag()}}
                         <div>
-                            {{form.billId}}
-                            {{form.evidence.label}}
-                            {{form.evidence()}}
-                            {% for error in form.evidence.errors %}
+                            {{form.description.label}}
+                            {{form.description()}}
+                            {% for error in form.description.errors %}
                                 <p style="color:red">{{ error }}</p>
-                            {% endfor %}                        
+                            {% endfor %}
+                            {{form.total.label}}
+                            {{form.total()}}
+                            {% for error in form.total.errors %}
+                                <p style="color:red">{{ error }}</p>
+                            {% endfor %}                          
                         </div>
                         {{form.submit()}}
 
@@ -82,6 +86,7 @@
 
                 </div>
             </div>
-</div>
+        </div>
 <script src="{{url_for('static', filename='js/paymentAction.js')}}"></script>
+<script src="{{url_for('static', filename='js/editBill.js')}}"></script>
 {% endblock %}

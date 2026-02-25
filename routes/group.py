@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, redirect, url_for, request, jsonify
+from flask import Blueprint, render_template, redirect, url_for, request, jsonify, abort
 from flask_login import login_required, current_user
 from werkzeug import security
 from configuration import db
@@ -60,13 +60,51 @@ def groupPage(id: int):
 def groupBillPage(groupId: int, billId: int):
     bill = Bills.query.filter_by(id=billId).first_or_404()
     if bill.groupId != groupId:
+        abort(404)
+    if GroupMembers.query.filter_by(userId=current_user.id, groupId=groupId).first() is None:
+        return redirect(url_for("root.joinGroup"))
+    debtors = Debtors.query.filter_by(billId=billId).all()
+    payments = Payments.query.filter_by(billId = billId).all()
+    form = CreateBillForm(obj=bill)
+    form.submit.label.text = "Save bill" #just so i can reuse the same form
+    return render_template("groupBill.html", bill=bill, payments=payments, debtors=debtors, form=form)
+
+
+    """if bill.groupId != groupId:
          return "404"#redirect(url_for("root.joinGroup"))
     for groupMember in GroupMembers.query.filter_by(groupId=groupId):
             if groupMember.userId == current_user.id:
                 debtors = Debtors.query.filter_by(billId=billId).all()
                 payments = Payments.query.filter_by(billId = billId).all()
                 return render_template("groupBill.html", bill=bill, debtors=debtors, payments=payments)
-    return redirect(url_for("root.joinGroup"))
+    return redirect(url_for("root.joinGroup"))"""
+
+@groupBp.route("/edit", methods=["POST"])
+def editBill():
+    # need the action to point here.
+    data = request.get_json()
+    billId = data["billId"]
+    description = data["description"]
+    amount = data["amount"]
+    billToEdit = Bills.query.filter_by(id=billId).first_or_404()
+    try:
+        billToEdit.description = description
+        billToEdit.total = amount
+        db.session.commit()
+    except Exception as e:
+        print(e)
+        db.session.rollback()
+
+    try:
+        for payment in Payments.query.filter_by(billId=billId).all():
+            db.session.delete(payment)
+            ...
+        for debtor in Debtors.query.filter_by(billId=billId).all():
+            debtor.status = "unpaid"
+        db.session.commit()
+    except Exception as e:
+        print(e)
+        db.session.rollback()
 
 
 """

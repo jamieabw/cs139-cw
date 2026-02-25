@@ -47,7 +47,7 @@ class LoginForm(FlaskForm):
             raise ValidationError("User credentials do not match.")
 
 class CreateBillForm(FlaskForm):
-    amount = DecimalField("Amount", validators=[DataRequired()])
+    total = DecimalField("Total", validators=[DataRequired()])
     description = StringField("Description", validators=[DataRequired(), Length(max=300)])
     submit = SubmitField("Create bill")
 
