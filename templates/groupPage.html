@@ -18,17 +18,19 @@
         <div class="col"><p>Created by</p></div>
     </div>
     {% for bill in bills %}
-    <a href="{{url_for('group.groupBillPage', groupId=group.id, billId=bill.id)}}">
-        <div class="row">
-            <div class="col"><p>{{bill.description}}</p></div>
-            <div class="col"><p>{{bill.total}}</p></div>
-            {% if bill.creator == current_user %}
-                 <div class="col"><p>You</p></div>
-            {% else %}
-                <div class="col"><p>{{bill.creator.username}}</p></div>
-            {% endif %}
-        </div>
-    </a>
+        {% if settledBillMap[bill.id] == False %}
+            <a href="{{url_for('group.groupBillPage', groupId=group.id, billId=bill.id)}}">
+                <div class="row">
+                    <div class="col"><p>{{bill.description}}</p></div>
+                    <div class="col"><p>{{bill.total}}</p></div>
+                    {% if bill.creator == current_user %}
+                        <div class="col"><p>You</p></div>
+                    {% else %}
+                        <div class="col"><p>{{bill.creator.username}}</p></div>
+                    {% endif %}
+                </div>
+            </a>
+        {% endif %}
     {% endfor %}
 </div>
 <hr>
@@ -45,7 +47,23 @@
         <div class="col"><p></p></div>
         <div class="col"><p></p></div>
     </div>
+    {% for bill in bills %}
+        {% if settledBillMap[bill.id] == True %}
+            <a href="{{url_for('group.groupBillPage', groupId=group.id, billId=bill.id)}}">
+                <div class="row">
+                    <div class="col"><p>{{bill.description}}</p></div>
+                    <div class="col"><p>{{bill.total}}</p></div>
+                    {% if bill.creator == current_user %}
+                        <div class="col"><p>You</p></div>
+                    {% else %}
+                        <div class="col"><p>{{bill.creator.username}}</p></div>
+                    {% endif %}
+                </div>
+            </a>
+        {% endif %}
+    {% endfor %}
 </div>
+
 
 <div class="modal fade" id="createBill" tabindex="-1" aria-hidden="true">
             <div class="modal-dialog">

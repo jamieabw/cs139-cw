@@ -21,13 +21,19 @@
             <div class="col">£{{debtor.owed}}</div>
         </div>
     {% endfor %}
-    <button>Edit bill</button>
+    {% if current_user == bill.creator %}
+        <button>Edit bill</button> <!--ajax will be used to do this,
+        - opens modal
+        - pre fills fields with existing data
+        - if you do change, all existing payments are removed and all debtors remarked as unpad
+         -->
+    {% endif %}
 
 </div>
 
 <h2>Payments</h2>
 <hr>
-<div class="grid">
+<div class="paymentGrid grid">
     <div class="row">
         <div class="col">Name</div>
         <div class="col">Paid</div>
@@ -35,17 +41,47 @@
         <div class="col">Status</div>
     </div>
     {% for payment in payments %}
-        <div class="row">
+        <div class="row paymentRow">
             <div class="col">{{payment.user.username}}</div>
             <div class="col">{{payment.amount}}</div>
             <div class="col">Evidence</div>
-            <div class="col">{{payment.status}}</div>
-            {% if payment.status != "settled" and current_user == payment.bill.creator %}
-                <div class="row"><button>Acknowledge</button></div>
-                <div class="row"><button>Reject</button></div>
+            <div class="col status">{{payment.status}}</div>
+            {% if payment.status == "pending" and current_user == payment.bill.creator %}
+                <div class="row"><button data-payment-id="{{payment.id}}" data-action="ack">Acknowledge</button></div>
+                <div class="row"><button data-payment-id="{{payment.id}}" data-action="rej">Reject</button></div>
             {% endif %}
         </div>
     {% endfor %}
 
 </div>
+
+<div class="modal fade" id="settleDebt" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+
+                <div class="modal-header">
+                    <h5 class="modal-title">Settle debt</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+
+                <div class="modal-body">
+                    <form method="POST" enctype="multipart/form-data">
+                        {{form.hidden_tag()}}
+                        <div>
+                            {{form.billId}}
+                            {{form.evidence.label}}
+                            {{form.evidence()}}
+                            {% for error in form.evidence.errors %}
+                                <p style="color:red">{{ error }}</p>
+                            {% endfor %}                        
+                        </div>
+                        {{form.submit()}}
+
+                    </form>
+                </div>
+
+                </div>
+            </div>
+</div>
+<script src="{{url_for('static', filename='js/paymentAction.js')}}"></script>
 {% endblock %}

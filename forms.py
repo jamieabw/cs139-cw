@@ -29,6 +29,12 @@ class RegisterForm(FlaskForm):
         nameToCheck = Users.query.filter_by(username=username.data).first()
         if nameToCheck:
             raise ValidationError("Username is already taken.")
+        
+
+    def validate_email(self, email):
+        emailToCheck = Users.query.filter_by(email=email.data).first()
+        if emailToCheck:
+            raise ValidationError("Email is already taken.")
 
 class LoginForm(FlaskForm):
     username = StringField("Username", validators=[DataRequired(), Length(max=50)])

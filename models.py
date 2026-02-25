@@ -93,12 +93,14 @@ class Debtors(db.Model):
     createdAt = db.Column("createdAt", db.DateTime, nullable=False)
     bill = db.relationship("Bills", foreign_keys=[billId])
     user = db.relationship("Users", foreign_keys=[userId])
+    status = db.Column("status", db.String(8))  # paid/unpaid
 
     def __init__(self, billId, userId, proportion, owed):
         self.billId = billId
         self.userId = userId
         self.proportion = proportion
         self.owed = owed
+        self.status = "unpaid"
         self.createdAt = datetime.now()
 
 

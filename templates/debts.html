@@ -15,32 +15,55 @@
     </div>
     {% for debt in debts %}
     {% set status = debtStatuses.get(debt.billId) %}
-    <div class="row">
-        <div class="col"><p>{{debt.bill.description}}</p></div>
-        <div class="col"><p>{{debt.bill.total}}</p></div>
-        <div class="col"><p>{{debt.owed}}</p></div>
-        <div class="col"><p>{{debt.bill.group.name}}</p></div>
-        {% if debt.bill.creator == current_user %}
-            <div class="col"><p>You</p></div>
-        {% else %}
-            <div class="col"><p>{{debt.bill.creator.username}}</p></div>
+        {% if status != "acknowledged" %}
+            <div class="row">
+                <div class="col"><p>{{debt.bill.description}}</p></div>
+                <div class="col"><p>{{debt.bill.total}}</p></div>
+                <div class="col"><p>{{debt.owed}}</p></div>
+                <div class="col"><p>{{debt.bill.group.name}}</p></div>
+                {% if debt.bill.creator == current_user %}
+                    <div class="col"><p>You</p></div>
+                {% else %}
+                    <div class="col"><p>{{debt.bill.creator.username}}</p></div>
+                {% endif %}
+                {% if status == "pending" %}
+                    <div class="col">{{status}}</div>
+                {% else %}
+                    <div class="col"><button type="button" data-bs-toggle="modal" data-bs-target="#settleDebt" data-bill-id="{{debt.billId}}">Settle</button></div>
+                {% endif %}
+            </div>
         {% endif %}
-        {% if status == "pending" %}
-            <div class="col">{{status}}</div>
-        {% elif status == "acknowledged" %}
-        <div class="col"></div>
-        {% else %}
-            <div class="col"><button type="button" data-bs-toggle="modal" data-bs-target="#settleDebt" data-bill-id="{{debt.billId}}">Settle</button></div>
-        {% endif %}
-    </div>
     {% endfor %}
 </div>
 <hr>
 
 <h3>Your settled debts</h3>
+
 <div>
+    <div class="row">
+        <div class="col"><p>Description</p></div>
+        <div class="col"><p>Total owed</p></div>
+        <div class="col"><p>What you owed</p></div>
+        <div class="col"><p>Group</p></div>
+        <div class="col"><p>Created by</p></div>
+        <div class="col"></div>
+    </div>
     {% for debt in debts %}
-    
+        {% set status = debtStatuses.get(debt.billId) %}
+        {% if status == "acknowledged" %}
+            <div class="row">
+                <div class="col"><p>{{debt.bill.description}}</p></div>
+                <div class="col"><p>{{debt.bill.total}}</p></div>
+                <div class="col"><p>{{debt.owed}}</p></div>
+                <div class="col"><p>{{debt.bill.group.name}}</p></div>
+                {% if debt.bill.creator == current_user %}
+                    <div class="col"><p>You</p></div>
+                {% else %}
+                    <div class="col"><p>{{debt.bill.creator.username}}</p></div>
+                {% endif %}
+                <div class="col"></div>
+            </div>
+        {% endif %}
     {% endfor %}
 </div>
 <!--THIS NEEDS JAVASCRIPT SO DONT BOTHER YET-->
@@ -72,5 +95,5 @@
                 </div>
             </div>
         </div>
-<script src="{{url_for('static', filename='js/main.js')}}"></script>
+<script src="{{url_for('static', filename='js/settle.js')}}"></script>
 {% endblock %}
