@@ -32,18 +32,18 @@ def groupPage(id: int):
     group = Groups.query.get_or_404(id)
     settledBillsMap = createSettledBillsMap(id)
     if form.validate_on_submit():
-        amount = form.amount.data
+        total = form.total.data
         desc = form.description.data
         try:
             """NOTE:
             THIS IS TEMPORARY PLACEHOLDER!!!! THIS WILL HAVE DIFFERENT SPLITTING EVENTUALLY
             """
-            newBill = Bills(current_user.id, id, desc, amount)
+            newBill = Bills(current_user.id, id, desc, total)
             db.session.add(newBill)
             numMembers = len(GroupMembers.query.filter_by(groupId=id).all())
             for userMember in GroupMembers.query.filter_by(groupId=id):
                 userId = userMember.userId
-                db.session.add(Debtors(newBill.id, userId, 100 / numMembers, amount / numMembers))
+                db.session.add(Debtors(newBill.id, userId, 100 / numMembers, total / numMembers))
             db.session.commit()
             print("success")
         except Exception as e:
@@ -70,41 +70,46 @@ def groupBillPage(groupId: int, billId: int):
     return render_template("groupBill.html", bill=bill, payments=payments, debtors=debtors, form=form)
 
 
-    """if bill.groupId != groupId:
-         return "404"#redirect(url_for("root.joinGroup"))
-    for groupMember in GroupMembers.query.filter_by(groupId=groupId):
-            if groupMember.userId == current_user.id:
-                debtors = Debtors.query.filter_by(billId=billId).all()
-                payments = Payments.query.filter_by(billId = billId).all()
-                return render_template("groupBill.html", bill=bill, debtors=debtors, payments=payments)
-    return redirect(url_for("root.joinGroup"))"""
-
-@groupBp.route("/edit", methods=["POST"])
-def editBill():
+@groupBp.route("/edit/<billId>", methods=["POST"])
+def editBill(billId: int):
     # need the action to point here.
     data = request.get_json()
-    billId = data["billId"]
+    #billId = data["billId"]
     description = data["description"]
-    amount = data["amount"]
+    total = float(data["total"])
     billToEdit = Bills.query.filter_by(id=billId).first_or_404()
+    print(data, billId, description, total)
+    numMembers = len(GroupMembers.query.filter_by(groupId=billToEdit.groupId).all())
     try:
         billToEdit.description = description
-        billToEdit.total = amount
-        db.session.commit()
-    except Exception as e:
-        print(e)
-        db.session.rollback()
-
-    try:
+        billToEdit.total = total
         for payment in Payments.query.filter_by(billId=billId).all():
             db.session.delete(payment)
             ...
+            """
+            THERE IS AN ISSUE WITH THIS, WHEN A USER JOINS AFTER A BILL IS CREATED
+            AND THEN THE BILL IS EDITED, THE SPLIT INCLUDES THEM BUT THEY ARENT INCLUDED IN THE 
+            BILL STILL AS THIS ONLY UPDATES ACCORDING TO THOSE WHO WERE APART OF IT ORIGINALLY,
+            THIS IS A MAJOR BUG AND NEEDS TO BE FIXED!!!!
+            """
         for debtor in Debtors.query.filter_by(billId=billId).all():
             debtor.status = "unpaid"
+            debtor.proportion = 100 / numMembers # can change this eventually when proportional
+            debtor.owed = total / numMembers
         db.session.commit()
     except Exception as e:
         print(e)
         db.session.rollback()
+    return jsonify({"ok": True, "billId": billId})
+
+
+@groupBp.route("/bill/<int:billId>/debtorsData")
+def debtorsData(billId: int):
+    print("hello world")
+    debtors = Debtors.query.filter_by(billId=billId).all()
+    data = [{"username": d.user.username,"proportion": float(d.proportion), "owed": float(d.owed)} for d in debtors]
+    print(data)
+    return jsonify({"debtors": data}) # sp this can be passed back into the HTML to update the grid
 
 
 """

@@ -7,7 +7,7 @@
 
 <h2>Bill split</h2>
 <hr>
-<div class="grid">
+<div class="grid" id="debtorsGrid">
     <div class="row">
         <div class="col">Name</div>
         <div class="col">Proportion</div>
@@ -21,6 +21,8 @@
             <div class="col">£{{debtor.owed}}</div>
         </div>
     {% endfor %}
+
+</div>
     {% if current_user == bill.creator %}
         <button type="button" data-bs-toggle="modal" data-bs-target="#editBill">Edit bill</button> <!--ajax will be used to do this,
         - opens modal
@@ -28,8 +30,6 @@
         - if you do change, all existing payments are removed and all debtors remarked as unpad
          -->
     {% endif %}
-
-</div>
 
 <h2>Payments</h2>
 <hr>
@@ -65,7 +65,7 @@
                 </div>
 
                 <div class="modal-body">
-                    <form id="editBillForm" method="POST" action="{{ url_for('group.editBill', groupId=bill.groupId, billId=bill.id) }}"></form>>
+                    <form id="editBillForm" method="POST" action="{{ url_for('group.editBill', billId=bill.id) }}">
                         {{form.hidden_tag()}}
                         <div>
                             {{form.description.label}}
@@ -79,6 +79,7 @@
                                 <p style="color:red">{{ error }}</p>
                             {% endfor %}                          
                         </div>
+                        <label style="color: red">Warning: editing the bill will delete all previous payments.</label>
                         {{form.submit()}}
 
                     </form>
