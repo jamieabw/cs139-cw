@@ -15,6 +15,9 @@ def index():
     return render_template("index.html", groups=usersGroups)
 
 # these two group creation and join routes are temporary, they will be replaced with a pop up form.
+"""
+change this to the proper flask-wtf form methods, and also implement ajax for this
+"""
 @rootBp.route("/createGroup", methods=["GET", "POST"])
 @login_required
 def createGroup():
@@ -35,7 +38,9 @@ def createGroup():
             db.session.rollback()
             return render_template("createGroupTemp.html")
 
-
+"""
+change this to the proper flask-wtf form methods, and also implement ajax for this
+"""
 @rootBp.route("/joinGroup", methods=["GET", "POST"])
 @login_required
 def joinGroup():

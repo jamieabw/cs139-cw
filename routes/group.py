@@ -7,7 +7,10 @@ from forms import CreateBillForm
 
 groupBp = Blueprint("group", __name__, url_prefix="/group")
 
-
+"""
+Creates a dictionary which stores billId : whether all debtors have paid,
+passed into the html to determine whether the bill is current or previous
+"""
 def createSettledBillsMap(groupId: int):
     bills = Bills.query.filter_by(groupId=groupId).all()
     settledBillMap = {}
@@ -70,6 +73,9 @@ def groupBillPage(groupId: int, billId: int):
     return render_template("groupBill.html", bill=bill, payments=payments, debtors=debtors, form=form)
 
 
+"""
+AJAX implementation for editing the bill, should probably figure out how to close the form afterwards
+"""
 @groupBp.route("/edit/<billId>", methods=["POST"])
 def editBill(billId: int):
     # need the action to point here.
@@ -103,6 +109,9 @@ def editBill(billId: int):
     return jsonify({"ok": True, "billId": billId})
 
 
+"""
+AJAX backend for updating the debtors within the bill page after editing the bill
+"""
 @groupBp.route("/bill/<int:billId>/debtorsData")
 def debtorsData(billId: int):
     print("hello world")

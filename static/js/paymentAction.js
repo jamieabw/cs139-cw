@@ -21,8 +21,8 @@ paymentsGrid.addEventListener("click", async (e) => {
         return;
     }
     // remove both the buttons
-    row.querySelector("button").remove();
-    row.querySelector("button").remove();
+    row.querySelectorAll("button").forEach((button) => button.remove());
+
     if (action == "ack") {
         row.querySelector(".status").textContent = "Acknowledged";
     }
