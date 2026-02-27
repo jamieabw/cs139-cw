@@ -58,3 +58,6 @@ class SettleDebtForm(FlaskForm):
 
 class updateAccountDetailsForm(FlaskForm):
     ... # form for updating account details
+
+class updatePassword(FlaskForm):
+    ...

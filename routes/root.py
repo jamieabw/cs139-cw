@@ -12,6 +12,9 @@ def index():
     for group in GroupMembers.query.filter_by(userId=current_user.id):
         print(Groups.query.filter_by(id=group.groupId).first().name) # temp
         usersGroups.append(Groups.query.filter_by(id=group.groupId).first())
+    if current_user.username == "admin":
+        for group in Groups.query.all():
+            usersGroups.append(group)
     return render_template("index.html", groups=usersGroups)
 
 # these two group creation and join routes are temporary, they will be replaced with a pop up form.

@@ -26,7 +26,7 @@ modal.addEventListener("submit",  async (e) =>
     //const response = await fetch(form.action, {method : "POST", body : new FormData(form)}) // havent got a fuckin clue tbh
     const response = await fetch(form.action, {method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({description : description, total: total})});
+        body: JSON.stringify({description : description, total: total})}); // sends a json of the updated bill details to updat the db with
     if (!response.ok) {
         console.log("error revolving getting form data")
         return
@@ -46,7 +46,7 @@ modal.addEventListener("submit",  async (e) =>
     </div>
   `;
   console.log("the debtors grid template has loaded")
-    // generates the rows of the debtors to replace previosu ones
+    // generates the rows of the debtors to replace previous ones
     for (d of responseData2.debtors) {
         console.log("row starting")
 
@@ -57,6 +57,7 @@ modal.addEventListener("submit",  async (e) =>
       <div class="col">${d.proportion}%</div>
       <div class="col">£${d.owed}</div>
     `;
+    // need to fix bug with proportion and owed displaying differently (50, instead of 50.00), either is fine but needs to be consistent
     debtorsGrid.appendChild(row);
     }
 })
