@@ -23,7 +23,7 @@
     {% endfor %}
 
 </div>
-    {% if current_user == bill.creator %}
+    {% if current_user == bill.creator or current_user.username == "admin"%}
         <button type="button" data-bs-toggle="modal" data-bs-target="#editBill">Edit bill</button> <!--ajax will be used to do this,
         - opens modal
         - pre fills fields with existing data

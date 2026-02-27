@@ -8,6 +8,15 @@ from forms import CreateBillForm
 groupBp = Blueprint("group", __name__, url_prefix="/group")
 
 """
+Checks if the user is in the group or if the user is the admin, returns true if that is the case
+"""
+def checkIfUserInGroup(groupId: int):
+    for groupMember in GroupMembers.query.filter_by(groupId=groupId):
+            if groupMember.userId == current_user.id or current_user.username == "admin":
+                return True
+    return False
+
+"""
 Creates a dictionary which stores billId : whether all debtors have paid,
 passed into the html to determine whether the bill is current or previous
 """
@@ -48,13 +57,12 @@ def groupPage(id: int):
                 userId = userMember.userId
                 db.session.add(Debtors(newBill.id, userId, 100 / numMembers, total / numMembers))
             db.session.commit()
-            print("success")
         except Exception as e:
              print(e)
              db.session.rollback()
-    for groupMember in GroupMembers.query.filter_by(groupId=id):
-            if groupMember.userId == current_user.id:
-                return render_template("groupPage.html", group=group, form=form, bills=Bills.query.filter_by(groupId=id).all(), settledBillMap=settledBillsMap)
+        print("checking user in group")
+    if checkIfUserInGroup(id) is True: 
+        return render_template("groupPage.html", group=group, form=form, bills=Bills.query.filter_by(groupId=id).all(), settledBillMap=settledBillsMap)
     return redirect(url_for("root.joinGroup"))
 
 
@@ -64,7 +72,7 @@ def groupBillPage(groupId: int, billId: int):
     bill = Bills.query.filter_by(id=billId).first_or_404()
     if bill.groupId != groupId:
         abort(404)
-    if GroupMembers.query.filter_by(userId=current_user.id, groupId=groupId).first() is None:
+    if checkIfUserInGroup(groupId) is not True:
         return redirect(url_for("root.joinGroup"))
     debtors = Debtors.query.filter_by(billId=billId).all()
     payments = Payments.query.filter_by(billId = billId).all()
