@@ -104,11 +104,11 @@ class Debtors(db.Model):
         self.createdAt = datetime.now()
 
 # notifications types will be settlement notification, debt notification, acknowledgement/rejection notification
-class Notifications(db.Model):
+"""class Notifications(db.Model):
     id = db.Column("id", db.Integer(), primary_key=True)
     groupId = db.Column("")
     userId = db.Column("")
-    type = db.Column("")
+    type = db.Column("")"""
 
 
 

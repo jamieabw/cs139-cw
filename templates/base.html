@@ -14,17 +14,19 @@
             <a href="{{url_for('root.index')}}">
             <h1>Digital Bill Splitter Deluxe</h1>
             </a>
-            <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown">Add Group</button>
-            <ul class="dropdown-menu">
-                <li><button type="button" data-bs-toggle="modal" data-bs-target="#createGroupModal">Create group</button></li>
-                <li><button type="button" data-bs-toggle="modal" data-bs-target="#joinGroupModal">Join group</button></li>
-            </ul>
-            <button class="btn"><a href="{{url_for('account.debts')}}" >View debts</a></button>
-            <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown">Account</button>
-            <ul class="dropdown-menu">
-                <li><a class="dropdown-item" href="{{url_for('account.manage')}}">Account settings</a></li>
-                <li><a class="dropdown-item" href="{{url_for('account.logout')}}">Log out</a></li>
-            </ul>
+            {% if current_user.is_authenticated %}
+                <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown">Add Group</button>
+                <ul class="dropdown-menu">
+                    <li><button type="button" data-bs-toggle="modal" data-bs-target="#createGroupModal">Create group</button></li>
+                    <li><button type="button" data-bs-toggle="modal" data-bs-target="#joinGroupModal">Join group</button></li>
+                </ul>
+                <button class="btn"><a href="{{url_for('account.debts')}}" >View debts</a></button>
+                <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown">Account</button>
+                <ul class="dropdown-menu">
+                    <li><a class="dropdown-item" href="{{url_for('account.manage')}}">Account settings</a></li>
+                    <li><a class="dropdown-item" href="{{url_for('account.logout')}}">Log out</a></li>
+                </ul>
+            {% endif %}
         </nav>
         {% block content %}
         {% endblock %}

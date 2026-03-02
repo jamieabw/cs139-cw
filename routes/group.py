@@ -2,10 +2,21 @@ from flask import Blueprint, render_template, redirect, url_for, request, jsonif
 from flask_login import login_required, current_user
 from werkzeug import security
 from configuration import db
-from models import Groups, GroupMembers, Bills, Debtors, Payments
+from models import Groups, GroupMembers, Bills, Debtors, Payments, Users
 from forms import CreateBillForm
 
 groupBp = Blueprint("group", __name__, url_prefix="/group")
+
+
+def setMemberProportionFields(groupId: int, form: object):
+    form.proportions.entries = []
+    for groupMember in GroupMembers.query.filter_by(groupId=groupId):
+        entry = {}
+        entry["memberId"] = groupMember.userId
+        entry["memberName"] = Users.query.filter_by(id=groupMember.userId).first().username
+        form.proportions.append_entry(entry)
+        
+
 
 """
 Checks if the user is in the group or if the user is the admin, returns true if that is the case
@@ -32,6 +43,26 @@ def createSettledBillsMap(groupId: int):
     return settledBillMap
 
 
+@groupBp.route("/<int:id>/delete")
+@login_required
+def deleteBill(id: int):
+    # need to drop the bill, drop all payments
+    billToDelete = Bills.query.filter_by(id=id).first()
+    groupId = billToDelete.groupId
+    if not checkIfUserInGroup(groupId):
+        redirect(url_for("group.joinGroup"))
+    try:
+        for payment in Payments.query.filter_by(billId=billToDelete.id).all():
+            db.session.delete(payment)
+        for debtor in Debtors.query.filter_by(billId=billToDelete.id):
+            db.session.delete(debtor)
+        db.session.delete(billToDelete)
+        db.session.commit()
+    except Exception as e:
+        print(e)
+        db.session.rollback()
+    return redirect(url_for(".groupPage", id=groupId))
+
 
 """
 checks if a group exists, if it doesn't then returns a 404, else it checks if the user belongs to the group
@@ -43,25 +74,40 @@ def groupPage(id: int):
     form = CreateBillForm()
     group = Groups.query.get_or_404(id)
     settledBillsMap = createSettledBillsMap(id)
+    if request.method == "GET":
+        setMemberProportionFields(id, form)
     if form.validate_on_submit():
-        total = form.total.data
+        total = float(form.total.data)
         desc = form.description.data
+        proportions = {}
+        """
+        {% for proportion in form.proportions %}
+                                <div>
+                                    <span>{{proportion.memberName.data}}</span>
+                                    <span class="percent" data-for="{{proportion.proportion.id}}"></span>%
+                                    {{proportion.memberId()}}
+                                    {{proportion.memberName()}}
+                                    <div>{{proportion.proportion(oninput="update(this)")}}</div>
+                                </div>
+        """
+        for proportion in form.proportions:
+            proportions[int(proportion.memberId.data)] = int(proportion.proportion.data)
+
         try:
-            """NOTE:
-            THIS IS TEMPORARY PLACEHOLDER!!!! THIS WILL HAVE DIFFERENT SPLITTING EVENTUALLY
-            """
+            print("TEST 2")
             newBill = Bills(current_user.id, id, desc, total)
             db.session.add(newBill)
-            numMembers = len(GroupMembers.query.filter_by(groupId=id).all())
             for userMember in GroupMembers.query.filter_by(groupId=id):
                 userId = userMember.userId
-                db.session.add(Debtors(newBill.id, userId, 100 / numMembers, total / numMembers))
+                db.session.add(Debtors(newBill.id, userId, proportions[userId], total * (proportions[userId] / 100)))
             db.session.commit()
+            print("it worked allegedly")
         except Exception as e:
              print(e)
+             print("WRONG WO+")
              db.session.rollback()
-        print("checking user in group")
-    if checkIfUserInGroup(id) is True: 
+        return redirect(url_for(".groupPage", id=id))
+    if checkIfUserInGroup(id) is True:
         return render_template("groupPage.html", group=group, form=form, bills=Bills.query.filter_by(groupId=id).all(), settledBillMap=settledBillsMap)
     return redirect(url_for("root.joinGroup"))
 
@@ -74,9 +120,11 @@ def groupBillPage(groupId: int, billId: int):
         abort(404)
     if checkIfUserInGroup(groupId) is not True:
         return redirect(url_for("root.joinGroup"))
+    form = CreateBillForm(obj=bill)
+    if request.method == "GET":
+        setMemberProportionFields(groupId, form)
     debtors = Debtors.query.filter_by(billId=billId).all()
     payments = Payments.query.filter_by(billId = billId).all()
-    form = CreateBillForm(obj=bill)
     form.submit.label.text = "Save bill" #just so i can reuse the same form
     return render_template("groupBill.html", bill=bill, payments=payments, debtors=debtors, form=form)
 
@@ -85,7 +133,7 @@ def groupBillPage(groupId: int, billId: int):
 AJAX implementation for editing the bill, should probably figure out how to close the form afterwards
 """
 @groupBp.route("/edit/<billId>", methods=["POST"])
-def editBill(billId: int):
+def editBill(billId: int, form):
     # need the action to point here.
     data = request.get_json()
     #billId = data["billId"]
@@ -93,19 +141,19 @@ def editBill(billId: int):
     total = float(data["total"])
     billToEdit = Bills.query.filter_by(id=billId).first_or_404()
     print(data, billId, description, total)
+    for groupMember in GroupMembers.query.filter_by(groupId=billToEdit.groupId).all():
+        if Debtors.query.filter_by(userId=groupMember.userId).first() is None: # checks whether any new members have been added
+            db.session.add(Debtors(billToEdit.id, groupMember.userId, 0, 0))
     numMembers = len(GroupMembers.query.filter_by(groupId=billToEdit.groupId).all())
+    proportions = {}
+    for proportion in form.proportions:
+            proportions[int(proportion.memberId.data)] = int(proportion.proportion.data)
+            print(proportions)
     try:
         billToEdit.description = description
         billToEdit.total = total
         for payment in Payments.query.filter_by(billId=billId).all():
             db.session.delete(payment)
-            ...
-            """
-            THERE IS AN ISSUE WITH THIS, WHEN A USER JOINS AFTER A BILL IS CREATED
-            AND THEN THE BILL IS EDITED, THE SPLIT INCLUDES THEM BUT THEY ARENT INCLUDED IN THE 
-            BILL STILL AS THIS ONLY UPDATES ACCORDING TO THOSE WHO WERE APART OF IT ORIGINALLY,
-            THIS IS A MAJOR BUG AND NEEDS TO BE FIXED!!!!
-            """
         for debtor in Debtors.query.filter_by(billId=billId).all():
             debtor.status = "unpaid"
             debtor.proportion = 100 / numMembers # can change this eventually when proportional
@@ -115,6 +163,27 @@ def editBill(billId: int):
         print(e)
         db.session.rollback()
     return jsonify({"ok": True, "billId": billId})
+
+"""
+NOTE: apparently something like this will fix my worries, just need to pass the form instead of the json.
+
+@groupBp.route("/edit/<int:billId>", methods=["POST"])
+@login_required
+def editBill(billId: int):
+    form = CreateBillForm()  # binds from request.form automatically
+
+    if not form.validate_on_submit():
+        return jsonify({"ok": False, "errors": form.errors}), 400
+
+    proportions = {}
+    for p in form.proportions:
+        proportions[int(p.memberId.data)] = float(p.proportion.data)
+
+    # now use proportions dict in your Debtors update
+    ...
+    return jsonify({"ok": True, "billId": billId})
+
+"""
 
 
 """
@@ -140,7 +209,6 @@ def resolveAction():
     action = data["action"]
     payment = Payments.query.filter_by(id=paymentId).first()
     debt = Debtors.query.filter_by(billId=payment.billId, userId=payment.payerId).first()
-
     if action == "ack": # acknowledgin the payment
         print(payment.payerId, "ack")
         try:
@@ -149,10 +217,7 @@ def resolveAction():
             db.session.commit()
         except Exception as e:
             print(e)
-            db.session.rollback()
-
-
-         
+            db.session.rollback()         
     elif action == "rej":
         print(payment.payerId, "rej")
         try:

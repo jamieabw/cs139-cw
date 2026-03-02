@@ -1,6 +1,6 @@
-from flask_wtf import FlaskForm
-from wtforms import StringField, SubmitField, EmailField, PasswordField, DecimalField, FileField, HiddenField
-from wtforms.validators import DataRequired, Length, ValidationError
+from flask_wtf import FlaskForm, Form
+from wtforms import StringField, SubmitField, EmailField, PasswordField, DecimalField, FileField, HiddenField, DecimalRangeField, FieldList, FormField
+from wtforms.validators import DataRequired, Length, ValidationError, NumberRange
 from flask_wtf.file import file_required, file_allowed
 from models import Groups, Users
 
@@ -46,16 +46,30 @@ class LoginForm(FlaskForm):
         if not nameToCheck:
             raise ValidationError("User credentials do not match.")
 
-class CreateBillForm(FlaskForm):
-    total = DecimalField("Total", validators=[DataRequired()])
-    description = StringField("Description", validators=[DataRequired(), Length(max=300)])
-    submit = SubmitField("Create bill")
 
 class SettleDebtForm(FlaskForm):
     billId = HiddenField(render_kw={"id": "billId"})
     evidence = FileField("Evidence", validators=[file_required(), file_allowed({"jpg", "png"}, "Evidence must be an image.")])
     submit = SubmitField("Send settle request")
 
+class ProportionSharingForm(Form): # inhreits Form instead to fix below issue
+    # seems like this is causing an error as the values arent actually get passed
+    memberId = HiddenField(validators=[DataRequired()])
+    memberName = HiddenField(validators=[DataRequired()])
+    proportion = DecimalRangeField(validators=[NumberRange(min=0, max=100)], render_kw={"min": 0, "max": 100, "step": 0.01})
+
+class CreateBillForm(FlaskForm):
+    total = DecimalField("Total", validators=[DataRequired()])
+    description = StringField("Description", validators=[DataRequired(), Length(max=300)])
+    proportions = FieldList(FormField(ProportionSharingForm), min_entries=0)
+    submit = SubmitField("Create bill")
+
+    def validate_proportions(self, proportions):
+        total = 0
+        for entry in proportions.entries:
+            total += float(entry.form.proportion.data)
+        if total > 100:
+            raise ValidationError("Total must not exceed 100%.")
 class updateAccountDetailsForm(FlaskForm):
     ... # form for updating account details
 

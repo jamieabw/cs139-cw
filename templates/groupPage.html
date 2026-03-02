@@ -78,16 +78,37 @@
                     <form method="POST">
                         {{form.hidden_tag()}}
                         <div>
-                            {{form.description.label}}
-                            {{form.description()}}
-                            {% for error in form.description.errors %}
-                                <p style="color:red">{{ error }}</p>
-                            {% endfor %}
-                            {{form.total.label}}
-                            {{form.total()}}
-                            {% for error in form.total.errors %}
-                                <p style="color:red">{{ error }}</p>
-                            {% endfor %}                          
+                            <div>
+                                {{form.description.label}}
+                                {{form.description()}}
+                                {% for error in form.description.errors %}
+                                    <p style="color:red">{{ error }}</p>
+                                {% endfor %}
+                            </div>
+                            <div>
+                                {{form.total.label}}
+                                {{form.total()}}
+                                {% for error in form.total.errors %}
+                                    <p style="color:red">{{ error }}</p>
+                                {% endfor %}
+                            </div>
+                            <div>
+                                {{form.proportions.label}}
+                                <button onclick="splitEvenly()" type="button">Split evenly</button>
+                                {% for proportion in form.proportions %}
+                                <div>
+                                    <span>{{proportion.memberName.data}}</span>
+                                    <span class="percent" data-for="{{proportion.proportion.id}}"></span>%
+                                    {{proportion.memberId()}}
+                                    {{proportion.memberName()}}
+                                    <div>{{proportion.proportion(oninput="update(this)")}}</div>
+                                </div>
+                                {% endfor %}
+                                <span class="totalPercent">Total: </span>%
+                                {% for error in form.proportions.errors %}
+                                    <p style="color:red">{{ error }}</p>
+                                {% endfor %}
+                            </div>                  
                         </div>
                         {{form.submit()}}
 
@@ -97,4 +118,5 @@
                 </div>
             </div>
         </div>
+<script src="{{url_for('static', filename='js/updatePercents.js')}}"></script>
 {% endblock %}
