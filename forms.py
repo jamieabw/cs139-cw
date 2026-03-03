@@ -68,8 +68,8 @@ class CreateBillForm(FlaskForm):
         total = 0
         for entry in proportions.entries:
             total += float(entry.form.proportion.data)
-        if total > 100:
-            raise ValidationError("Total must not exceed 100%.")
+        if total < 99.9 or total > 100.1: # small error margin for recuring decimals like 1/3 etc
+            raise ValidationError("Total must be ~100%.")
 class updateAccountDetailsForm(FlaskForm):
     ... # form for updating account details
 

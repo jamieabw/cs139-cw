@@ -2,7 +2,7 @@ from flask import Blueprint, render_template, request, redirect, url_for
 from flask_login import login_user, logout_user, current_user, login_required
 from werkzeug import security
 from configuration import db, loginManager
-from models import Users, Debtors, Payments
+from models import Users, Debtors, Payments, Notifications
 from forms import RegisterForm, LoginForm, SettleDebtForm
 
 accountBp = Blueprint("account", __name__, url_prefix="/account")
@@ -59,6 +59,7 @@ def debts():
         amount = debt.owed
         billId = debt.bill.id
         db.session.add(Payments(billId, payerId, payeeId, amount, evidence))
+        db.session.add(Notifications(debt.bill.groupId, payeeId, current_user.id, "bill payment"))
         db.session.commit()
         return redirect(url_for(".debts"))
 

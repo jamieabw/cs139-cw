@@ -2,7 +2,7 @@ from flask import Blueprint, render_template, redirect, url_for, request, jsonif
 from flask_login import login_required, current_user
 from werkzeug import security
 from configuration import db
-from models import Groups, GroupMembers, Bills, Debtors, Payments, Users
+from models import Groups, GroupMembers, Bills, Debtors, Payments, Users, Notifications
 from forms import CreateBillForm
 
 groupBp = Blueprint("group", __name__, url_prefix="/group")
@@ -91,7 +91,7 @@ def groupPage(id: int):
                                 </div>
         """
         for proportion in form.proportions:
-            proportions[int(proportion.memberId.data)] = int(proportion.proportion.data)
+            proportions[int(proportion.memberId.data)] = float(proportion.proportion.data)
 
         try:
             print("TEST 2")
@@ -99,7 +99,10 @@ def groupPage(id: int):
             db.session.add(newBill)
             for userMember in GroupMembers.query.filter_by(groupId=id):
                 userId = userMember.userId
+                if proportions[userId] == 0:
+                    continue
                 db.session.add(Debtors(newBill.id, userId, proportions[userId], total * (proportions[userId] / 100)))
+                db.session.add(Notifications(id, userMember.userId, current_user.id, "create bill"))
             db.session.commit()
             print("it worked allegedly")
         except Exception as e:
@@ -130,60 +133,50 @@ def groupBillPage(groupId: int, billId: int):
 
 
 """
-AJAX implementation for editing the bill, should probably figure out how to close the form afterwards
-"""
-@groupBp.route("/edit/<billId>", methods=["POST"])
-def editBill(billId: int, form):
-    # need the action to point here.
-    data = request.get_json()
-    #billId = data["billId"]
-    description = data["description"]
-    total = float(data["total"])
-    billToEdit = Bills.query.filter_by(id=billId).first_or_404()
-    print(data, billId, description, total)
-    for groupMember in GroupMembers.query.filter_by(groupId=billToEdit.groupId).all():
-        if Debtors.query.filter_by(userId=groupMember.userId).first() is None: # checks whether any new members have been added
-            db.session.add(Debtors(billToEdit.id, groupMember.userId, 0, 0))
-    numMembers = len(GroupMembers.query.filter_by(groupId=billToEdit.groupId).all())
-    proportions = {}
-    for proportion in form.proportions:
-            proportions[int(proportion.memberId.data)] = int(proportion.proportion.data)
-            print(proportions)
-    try:
-        billToEdit.description = description
-        billToEdit.total = total
-        for payment in Payments.query.filter_by(billId=billId).all():
-            db.session.delete(payment)
-        for debtor in Debtors.query.filter_by(billId=billId).all():
-            debtor.status = "unpaid"
-            debtor.proportion = 100 / numMembers # can change this eventually when proportional
-            debtor.owed = total / numMembers
-        db.session.commit()
-    except Exception as e:
-        print(e)
-        db.session.rollback()
-    return jsonify({"ok": True, "billId": billId})
-
-"""
 NOTE: apparently something like this will fix my worries, just need to pass the form instead of the json.
-
+"""
 @groupBp.route("/edit/<int:billId>", methods=["POST"])
 @login_required
 def editBill(billId: int):
     form = CreateBillForm()  # binds from request.form automatically
 
-    if not form.validate_on_submit():
-        return jsonify({"ok": False, "errors": form.errors}), 400
+    if form.validate_on_submit():
 
-    proportions = {}
-    for p in form.proportions:
-        proportions[int(p.memberId.data)] = float(p.proportion.data)
+        proportions = {}
+        for proportion in form.proportions:
+            proportions[int(proportion.memberId.data)] = float(proportion.proportion.data)
+            print(int(proportion.memberId.data), float(proportion.proportion.data))
+        description = form.description.data
+        total = float(form.total.data)
+        billToEdit = Bills.query.filter_by(id=billId).first_or_404()
+        billToEdit.total = total
+        billToEdit.description = description
+        for groupMember in GroupMembers.query.filter_by(groupId=billToEdit.groupId).all():
+            if Debtors.query.filter_by(userId=groupMember.userId).first() is None: # checks whether any new members have been added
+                db.session.add(Debtors(billToEdit.id, groupMember.userId, 0, 0))
+        try:
+            for payment in Payments.query.filter_by(billId=billId).all():
+                db.session.delete(payment)
+            for debtor in Debtors.query.filter_by(billId=billId):
+                if proportions[debtor.userId] == 0:
+                    print("DELETED ", debtor.userId)
+                    db.session.delete(debtor) # so they dont owe a 0 quid debt
+                    continue
+                debtor.proportion = proportions[debtor.userId]
+                debtor.owed = total * (proportions[debtor.userId] / 100)
+                debtor.status = "unpaid"
+                db.session.add(Notifications(billToEdit.groupId, debtor.userId, current_user.id, "edit bill"))
+            db.session.commit()
+        except Exception as e:
+            print("something went wrong:", e)
+            db.session.rollback()
 
-    # now use proportions dict in your Debtors update
-    ...
-    return jsonify({"ok": True, "billId": billId})
+        # now use proportions dict in your Debtors update
+        ...
+        return jsonify({"ok": True, "billId": billId})
+    return jsonify({"ok": False, "errors": form.errors})
 
-"""
+
 
 
 """
@@ -214,6 +207,7 @@ def resolveAction():
         try:
             payment.status = "acknowledged"
             debt.status = "paid"
+            db.session.add(Notifications(debt.bill.groupId, payment.payerId, current_user.id, "payment acknowledged"))
             db.session.commit()
         except Exception as e:
             print(e)
@@ -222,6 +216,7 @@ def resolveAction():
         print(payment.payerId, "rej")
         try:
             payment.status = "rejected"
+            db.session.add(Notifications(debt.bill.groupId, payment.payerId, current_user.id, "payment rejected")) # need to finish this
             db.session.commit()
         except Exception as e:
             print(e)

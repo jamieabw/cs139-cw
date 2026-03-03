@@ -1,8 +1,8 @@
+- add ajax for sending settle requests
 - implement pop up forms for create/join group and implement ajax for both
 - implement notifications, and email notifications
 - implement a 'confirm password' field in account registration
 - add a recover account technique
-- proportion backend through edit bill, i fucking hate this coursework with all my passion.
 - keep track of user logs
 - style it nicely with css
 - add nicer interactivity with JS

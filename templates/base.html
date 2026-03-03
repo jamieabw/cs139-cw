@@ -26,6 +26,31 @@
                     <li><a class="dropdown-item" href="{{url_for('account.manage')}}">Account settings</a></li>
                     <li><a class="dropdown-item" href="{{url_for('account.logout')}}">Log out</a></li>
                 </ul>
+                <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="#" role="button"
+                    data-bs-toggle="dropdown" aria-expanded="false">
+                    Notifications <span class="badge bg-danger">3</span> <!-- replace this with the len of notis-->
+                </a>
+
+                <div class="dropdown-menu dropdown-menu-end p-0"
+                    style="width: 320px;">
+
+                    <div class="overflow-auto" style="max-height: 50vh;">
+                    <a class="dropdown-item text-wrap" href="#">Alice edited “Electric” bill</a>
+                    <a class="dropdown-item text-wrap" href="#">Payment recorded: £12.50</a>
+                    <a class="dropdown-item text-wrap" href="#">You were added to Group X</a>
+                    </div>
+                    <!--this will need a fair amount of if statements, the notifications will need to be queried for
+                    every page, when you click the dismiss button (which isnt implemented here yet), it will drop
+                    the notification from the table, you should probably also make it so notifications arent sent to yourself-->
+
+                    <div class="p-2 border-top">
+                    <a class="btn btn-sm btn-primary w-100" href="/notifications">View all</a>
+                    </div>
+                </div>
+                </li>
+
+
             {% endif %}
         </nav>
         {% block content %}

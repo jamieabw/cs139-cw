@@ -103,12 +103,32 @@ class Debtors(db.Model):
         self.status = "unpaid"
         self.createdAt = datetime.now()
 
-# notifications types will be settlement notification, debt notification, acknowledgement/rejection notification
-"""class Notifications(db.Model):
+"""
+notifcation types will be a payment noti, settlement/rejection noti, editing/creating bill noti,
+the emails will be have the same template, with just things like type and creator filled out
+
+i think this works, probably not though
+"""
+class Notifications(db.Model):
     id = db.Column("id", db.Integer(), primary_key=True)
-    groupId = db.Column("")
-    userId = db.Column("")
-    type = db.Column("")"""
+    groupId = db.Column("groupId", db.ForeignKey("groups.id"))
+    userId = db.Column("userId", db.ForeignKey("users.id"))
+    creatorId = db.Column("creatorId", db.ForeignKey("users.id"))
+    type = db.Column("type", db.String(40))
+    group = db.relationship("Groups", foreign_keys=[groupId])
+    creator = db.relationship("Users", foreign_keys=[userId])
+    createdAt = db.Column("createdAt", db.DateTime, nullable=False)
+
+    def __init__(self, groupId, userId, creatorId, type):
+        self.groupId = groupId
+        self.userId = userId
+        self.creatorId = creatorId
+        self.type = type
+        self.createdAt = datetime.now()
+
+"""
+types: "create bill", "edit bill", "payment acknowledged", "payment rejected", "bill payment"
+"""
 
 
 
