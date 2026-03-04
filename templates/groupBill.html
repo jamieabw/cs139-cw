@@ -80,9 +80,6 @@
                                 {{form.proportions.label}}
                                 <button onclick="splitEvenly()" type="button">Split evenly</button>
                                 {% for proportion in form.proportions %}
-                                <script>
-                                    console.log("fucking hate this shit ")
-                                </script>
                                 <div>
                                     <span>{{proportion.memberName.data}}</span>
                                     <span class="percent" data-for="{{proportion.proportion.id}}"></span>%

@@ -116,7 +116,7 @@ class Notifications(db.Model):
     creatorId = db.Column("creatorId", db.ForeignKey("users.id"))
     type = db.Column("type", db.String(40))
     group = db.relationship("Groups", foreign_keys=[groupId])
-    creator = db.relationship("Users", foreign_keys=[userId])
+    creator = db.relationship("Users", foreign_keys=[creatorId])
     createdAt = db.Column("createdAt", db.DateTime, nullable=False)
 
     def __init__(self, groupId, userId, creatorId, type):

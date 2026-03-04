@@ -6,9 +6,9 @@
 {% if groups|length == 0 %}
     <p>Sorry, there are no groups to display.</p>
 {% else %}
-    <div class="grid">
+    <div class="grid groupGrid">
     {% for group in groups %}
-        <div class="row">
+        <div class="row groupContainer">
             <a href="{{url_for('group.groupPage', id=group.id)}}">
             <div class="col">{{group.name}}</div>
             <div class="col">{{group.groupId}}</div>

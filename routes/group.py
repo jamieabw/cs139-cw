@@ -3,7 +3,7 @@ from flask_login import login_required, current_user
 from werkzeug import security
 from configuration import db
 from models import Groups, GroupMembers, Bills, Debtors, Payments, Users, Notifications
-from forms import CreateBillForm
+from forms import CreateBillForm, CreateGroupForm, JoinGroupForm
 
 groupBp = Blueprint("group", __name__, url_prefix="/group")
 
@@ -41,6 +41,49 @@ def createSettledBillsMap(groupId: int):
         else:
              settledBillMap[bill.id] = False
     return settledBillMap
+
+@groupBp.route("/create", methods=["POST"])
+@login_required
+def createGroup():
+    form = CreateGroupForm()
+    groupName = form.groupName.data
+    groupPassword = form.groupPassword.data
+    print(groupName, groupPassword)
+    try:
+        groupPassword = security.generate_password_hash(groupPassword)
+        group = Groups(groupName, groupPassword)
+        db.session.add(group)
+        db.session.flush() # fixes the issue with the group.id being null
+        print(current_user.id, group.id)
+        db.session.add(GroupMembers(current_user.id, group.id))
+        db.session.commit()
+        print("group added!")
+        return jsonify({"groupName" : groupName, "groupId": group.id, "groupCreatedAt": group.createdAt,
+                         "groupUrl" : url_for("group.groupPage", id=group.id), "ok" : True})
+    except Exception as e:
+        print(e)
+        db.session.rollback()
+        return jsonify({"ok" : False})
+
+@groupBp.route("/join", methods=["POST"])
+@login_required
+def joinGroup():
+    form = JoinGroupForm()
+    groupName = form.groupName.data
+    groupPassword = form.groupPassword.data
+    print(groupName, groupPassword)
+    try:
+        group = Groups.query.filter_by(name=groupName).first()
+        if security.check_password_hash(group.groupPassword, groupPassword):
+            db.session.add(GroupMembers(current_user.id, group.id))
+            db.session.commit()
+            print("group added!")
+            return jsonify({"groupName" : groupName, "groupId": group.id, "groupCreatedAt": group.createdAt,
+                            "groupUrl" : url_for("group.groupPage", id=group.id), "ok" : True})
+    except Exception as e:
+        print(e)
+        db.session.rollback()
+    return jsonify({"ok" : False})
 
 
 @groupBp.route("/<int:id>/delete")
@@ -102,7 +145,8 @@ def groupPage(id: int):
                 if proportions[userId] == 0:
                     continue
                 db.session.add(Debtors(newBill.id, userId, proportions[userId], total * (proportions[userId] / 100)))
-                db.session.add(Notifications(id, userMember.userId, current_user.id, "create bill"))
+                if current_user.id != userMember.userId:
+                    db.session.add(Notifications(id, userMember.userId, current_user.id, "create bill"))
             db.session.commit()
             print("it worked allegedly")
         except Exception as e:
@@ -165,7 +209,8 @@ def editBill(billId: int):
                 debtor.proportion = proportions[debtor.userId]
                 debtor.owed = total * (proportions[debtor.userId] / 100)
                 debtor.status = "unpaid"
-                db.session.add(Notifications(billToEdit.groupId, debtor.userId, current_user.id, "edit bill"))
+                if debtor.userId != current_user.id:
+                    db.session.add(Notifications(billToEdit.groupId, debtor.userId, current_user.id, "edit bill"))
             db.session.commit()
         except Exception as e:
             print("something went wrong:", e)
@@ -207,7 +252,8 @@ def resolveAction():
         try:
             payment.status = "acknowledged"
             debt.status = "paid"
-            db.session.add(Notifications(debt.bill.groupId, payment.payerId, current_user.id, "payment acknowledged"))
+            if payment.payerId != current_user.id:
+                db.session.add(Notifications(debt.bill.groupId, payment.payerId, current_user.id, "payment acknowledged"))
             db.session.commit()
         except Exception as e:
             print(e)
@@ -216,7 +262,8 @@ def resolveAction():
         print(payment.payerId, "rej")
         try:
             payment.status = "rejected"
-            db.session.add(Notifications(debt.bill.groupId, payment.payerId, current_user.id, "payment rejected")) # need to finish this
+            if payment.payerId != current_user.id:
+                db.session.add(Notifications(debt.bill.groupId, payment.payerId, current_user.id, "payment rejected")) # need to finish this
             db.session.commit()
         except Exception as e:
             print(e)

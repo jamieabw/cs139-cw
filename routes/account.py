@@ -59,7 +59,8 @@ def debts():
         amount = debt.owed
         billId = debt.bill.id
         db.session.add(Payments(billId, payerId, payeeId, amount, evidence))
-        db.session.add(Notifications(debt.bill.groupId, payeeId, current_user.id, "bill payment"))
+        if payeeId != current_user.id:
+            db.session.add(Notifications(debt.bill.groupId, payeeId, current_user.id, "bill payment"))
         db.session.commit()
         return redirect(url_for(".debts"))
 

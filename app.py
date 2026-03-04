@@ -4,6 +4,10 @@ from configuration import db, SECRET_KEY, loginManager
 from routes.root import rootBp
 from routes.account import accountBp
 from routes.group import groupBp
+from models import Notifications
+from flask_login import current_user
+from forms import JoinGroupForm, CreateGroupForm
+
 """app = Flask(__name__)
 app.register_blueprint(rootBp)"""
 
@@ -22,6 +26,20 @@ def create_app():
     with app.app_context():
         db.create_all()
 
+    @app.context_processor
+    def injectGlobals():
+        if not current_user.is_authenticated:
+            return {"notifications": [],
+                    "createGroupForm" : CreateGroupForm(),
+                    "joinGroupForm" : JoinGroupForm()}
+        return {
+            "notifications": Notifications.query.filter_by(userId=current_user.id).all(),
+            "createGroupForm" : CreateGroupForm(),
+            "joinGroupForm" : JoinGroupForm()
+                }
+
     return app
+
+
 
 

@@ -1,11 +1,11 @@
-from flask import Blueprint, render_template, redirect, url_for, request
+from flask import Blueprint, render_template, redirect, url_for, request, jsonify
 from flask_login import login_required, current_user
 from werkzeug import security
 from configuration import db
-from models import Groups, GroupMembers
+from models import Groups, GroupMembers, Notifications
 rootBp = Blueprint("root", __name__, url_prefix="")
 
-@rootBp.route("/")
+@rootBp.route("/", methods=["GET", "POST"])
 @login_required
 def index():
     usersGroups = []
@@ -67,4 +67,22 @@ def joinGroup():
             print(e)
             db.session.rollback()
             return render_template("joinGroupTemp.html")
+        
+@rootBp.route("/notification/dismiss", methods=["POST"])
+def dismissNoti():
+    #print("I\nAM\nGETTING\n\n\n\n\nHERE")
+    data = request.get_json()
+    notificationId = data["notificationId"]
+    userId = Notifications.query.filter_by(id=notificationId).first_or_404().userId
+    try:
+        db.session.delete(Notifications.query.filter_by(id=notificationId).first())
+        db.session.commit()
+    except Exception as e:
+        print("ERROR: ", e)
+        db.session.rollback()
+        return jsonify({"ok" : False})
+    numOfNotis = len(Notifications.query.filter_by(userId=userId).all())
+    print(numOfNotis)
+    return jsonify({"ok": True, "numOfNotis": numOfNotis})
+    
         

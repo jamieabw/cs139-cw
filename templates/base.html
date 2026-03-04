@@ -26,29 +26,47 @@
                     <li><a class="dropdown-item" href="{{url_for('account.manage')}}">Account settings</a></li>
                     <li><a class="dropdown-item" href="{{url_for('account.logout')}}">Log out</a></li>
                 </ul>
-                <li class="nav-item dropdown">
-                <a class="nav-link dropdown-toggle" href="#" role="button"
+
+                <button class="btn dropdown-toggle" href="#" role="button"
                     data-bs-toggle="dropdown" aria-expanded="false">
-                    Notifications <span class="badge bg-danger">3</span> <!-- replace this with the len of notis-->
-                </a>
+                    Notifications <span class="badge bg-danger notificationCounter">{{notifications|length}}</span> <!-- replace this with the len of notis-->
+                </button>
 
                 <div class="dropdown-menu dropdown-menu-end p-0"
                     style="width: 320px;">
 
-                    <div class="overflow-auto" style="max-height: 50vh;">
-                    <a class="dropdown-item text-wrap" href="#">Alice edited “Electric” bill</a>
-                    <a class="dropdown-item text-wrap" href="#">Payment recorded: £12.50</a>
-                    <a class="dropdown-item text-wrap" href="#">You were added to Group X</a>
+                    <div class="overflow-auto notificationSection" style="max-height: 50vh;">
+                        {% for notification in notifications %}
+                            <span class="dropdown-item text-wrap">
+                                {% if notification.type == "create bill" %}
+                                    {{notification.creator.username}} created a bill in {{notification.group.name}}
+
+                                {% elif notification.type == "edit bill" %}
+                                    {{notification.creator.username}} edited a bill in {{notification.group.name}}
+
+                                {% elif notification.type == "payment acknowledged" %}
+                                    {{notification.creator.username}} acknowledged your payment in {{notification.group.name}}
+
+                                {% elif notification.type == "payment rejected" %}
+                                    {{notification.creator.username}} rejected your payment in {{notification.group.name}}
+
+                                {% elif notification.type == "bill payment" %}
+                                    {{notification.creator.username}} has submitted a payment in {{notification.group.name}}
+
+                                {% endif %}
+                                <button data-notification-id="{{notification.id}}">Dismiss</button>
+                            </span>
+                        {% endfor %}
+                        {% if notifications|length == 0 %}
+                            <span class="dropdown-item text-wrap">You currently have no notifications.</span>
+                        {% endif %}
                     </div>
                     <!--this will need a fair amount of if statements, the notifications will need to be queried for
                     every page, when you click the dismiss button (which isnt implemented here yet), it will drop
                     the notification from the table, you should probably also make it so notifications arent sent to yourself-->
 
-                    <div class="p-2 border-top">
-                    <a class="btn btn-sm btn-primary w-100" href="/notifications">View all</a>
                     </div>
                 </div>
-                </li>
 
 
             {% endif %}
@@ -65,8 +83,15 @@
                 </div>
 
                 <div class="modal-body">
-                    <form method="POST">
-                    <a href="{{url_for('root.createGroup')}}">Create group</a>
+                    <form method="POST" action="group/create" class="groupForm">
+                        {{createGroupForm.groupName.label}}
+                        {{createGroupForm.groupName()}}
+                        {{createGroupForm.groupPassword.label}}
+                        {{createGroupForm.groupPassword()}}
+                        {{createGroupForm.groupName.label}}
+                        {{createGroupForm.submit()}}
+
+
                     </form>
                 </div>
 
@@ -78,17 +103,30 @@
                 <div class="modal-content">
 
                 <div class="modal-header">
-                    <h5 class="modal-title">Create group</h5>
+                    <h5 class="modal-title">Join group</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
 
                 <div class="modal-body">
                     <a href="{{url_for('root.joinGroup')}}">Join group</a>
+                    <form method="POST" action="/group/join" class="groupForm">
+                        {{joinGroupForm.groupName.label}}
+                        {{joinGroupForm.groupName()}}
+                        {{joinGroupForm.groupPassword.label}}
+                        {{joinGroupForm.groupPassword()}}
+                        {{joinGroupForm.groupName.label}}
+                        {{joinGroupForm.submit()}}
+
+
+                    </form>
                 </div>
 
                 </div>
             </div>
         </div>
         <script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
+        <script src="{{url_for('static', filename='js/dismissNotification.js')}}"></script>
+        <script src="{{url_for('static', filename='js/groupForms.js')}}"> </script>
+
     </body>
 </html>
