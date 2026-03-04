@@ -41,6 +41,13 @@
             {% for error in form.password.errors %}
                 <p style="color:red">{{ error }}</p>
             {% endfor %}
+            <div>
+            {{form.confirmPassword.label}}
+            {{form.confirmPassword()}}
+            </div>
+            {% for error in form.confirmPassword.errors %}
+                <p style="color:red">{{ error }}</p>
+            {% endfor %}
             
         </div>
         {{form.submit()}}

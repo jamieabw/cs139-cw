@@ -2,7 +2,7 @@ from flask import Blueprint, render_template, redirect, url_for, request, jsonif
 from flask_login import login_required, current_user
 from werkzeug import security
 from configuration import db
-from models import Groups, GroupMembers, Bills, Debtors, Payments, Users, Notifications
+from models import Groups, GroupMembers, Bills, Debtors, Payments, Users, Notifications, BillLog
 from forms import CreateBillForm, CreateGroupForm, JoinGroupForm
 
 groupBp = Blueprint("group", __name__, url_prefix="/group")
@@ -46,6 +46,11 @@ def createSettledBillsMap(groupId: int):
 @login_required
 def createGroup():
     form = CreateGroupForm()
+    if not form.validate_on_submit():
+        print(form.errors)
+        errors = list(value[0] for value in form.errors.values())
+        print(errors)
+        return jsonify(ok=False, errors=errors), 400
     groupName = form.groupName.data
     groupPassword = form.groupPassword.data
     print(groupName, groupPassword)
@@ -69,6 +74,11 @@ def createGroup():
 @login_required
 def joinGroup():
     form = JoinGroupForm()
+    if not form.validate_on_submit():
+        print(form.errors)
+        errors = list(value[0] for value in form.errors.values())
+        print(errors)
+        return jsonify(ok=False, errors=errors), 400
     groupName = form.groupName.data
     groupPassword = form.groupPassword.data
     print(groupName, groupPassword)
@@ -97,8 +107,10 @@ def deleteBill(id: int):
     try:
         for payment in Payments.query.filter_by(billId=billToDelete.id).all():
             db.session.delete(payment)
-        for debtor in Debtors.query.filter_by(billId=billToDelete.id):
+        for debtor in Debtors.query.filter_by(billId=billToDelete.id).all():
             db.session.delete(debtor)
+        for log in BillLog.query.filter_by(billId=billToDelete.id):
+            db.session.delete(log)
         db.session.delete(billToDelete)
         db.session.commit()
     except Exception as e:
@@ -148,6 +160,8 @@ def groupPage(id: int):
                 if current_user.id != userMember.userId:
                     db.session.add(Notifications(id, userMember.userId, current_user.id, "create bill"))
             db.session.commit()
+            db.session.add(BillLog(current_user.id, newBill.id,f"Created a £{total} bill with description '{desc}'"))
+            db.session.commit()
             print("it worked allegedly")
         except Exception as e:
              print(e)
@@ -173,7 +187,7 @@ def groupBillPage(groupId: int, billId: int):
     debtors = Debtors.query.filter_by(billId=billId).all()
     payments = Payments.query.filter_by(billId = billId).all()
     form.submit.label.text = "Save bill" #just so i can reuse the same form
-    return render_template("groupBill.html", bill=bill, payments=payments, debtors=debtors, form=form)
+    return render_template("groupBill.html", bill=bill, payments=payments, debtors=debtors, form=form, logs=BillLog.query.filter_by(billId=billId).all())
 
 
 """
@@ -211,6 +225,7 @@ def editBill(billId: int):
                 debtor.status = "unpaid"
                 if debtor.userId != current_user.id:
                     db.session.add(Notifications(billToEdit.groupId, debtor.userId, current_user.id, "edit bill"))
+            db.session.add(BillLog(current_user.id, billToEdit.id,f"Edited the bill to become a £{total} bill with description: {description}"))
             db.session.commit()
         except Exception as e:
             print("something went wrong:", e)

@@ -130,6 +130,43 @@ class Notifications(db.Model):
 types: "create bill", "edit bill", "payment acknowledged", "payment rejected", "bill payment"
 """
 
+class BillLog(db.Model):
+    id = db.Column("id", db.Integer(), primary_key=True)
+    userId = db.Column("userId", db.ForeignKey("users.id"))
+    billId = db.Column("billId", db.ForeignKey("bills.id"))
+    information = db.Column("information", db.String(300))
+    createdAt = db.Column("createdAt", db.DateTime, nullable=False)
+    user = db.relationship("Users", foreign_keys=[userId])
+    bill = db.relationship("Bills", foreign_keys=[billId])
+
+    def __init__(self, userId, billId, information):
+        self.userId = userId
+        self.information = information
+        self.billId = billId
+        self.createdAt = datetime.now()
+    """
+    bill log for creating, payment, editing
+    """
+
+class LoginAttemptLogs(db.Model):
+    id = db.Column("id", db.Integer(), primary_key=True)
+    userId = db.Column("userId", db.ForeignKey("users.id"))
+    information = db.Column("information", db.String(300))
+    successful = db.Column("successful", db.Boolean(), nullable=False)
+    createdAt = db.Column("createdAt", db.DateTime, nullable=False)
+    user = db.relationship("Users", foreign_keys=[userId])
+
+
+    def __init__(self, userId, information, successful):
+        self.userId = userId
+        self.information = information
+        self.successful = successful
+        self.createdAt = datetime.now()
+
+"""
+events to log: created account, login failure, login success, !password change, !email change, !recovery attempt
+! - extras
+"""
 
 
 

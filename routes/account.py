@@ -2,8 +2,8 @@ from flask import Blueprint, render_template, request, redirect, url_for
 from flask_login import login_user, logout_user, current_user, login_required
 from werkzeug import security
 from configuration import db, loginManager
-from models import Users, Debtors, Payments, Notifications
-from forms import RegisterForm, LoginForm, SettleDebtForm
+from models import Users, Debtors, Payments, Notifications, LoginAttemptLogs, BillLog
+from forms import RegisterForm, LoginForm, SettleDebtForm, RecoverAccountForm, RecoverResetPasswordForm, updateAccountDetailsForm, updatePasswordForm
 
 accountBp = Blueprint("account", __name__, url_prefix="/account")
 
@@ -22,6 +22,9 @@ def register():
         db.session.add(user)
         db.session.commit()
         login_user(user)
+        log = LoginAttemptLogs(user.id, "Created an account.", True)
+        db.session.add(log)
+        db.session.commit()
         return redirect(url_for("root.index"))
     return render_template("register.html", form=form)
 
@@ -32,15 +35,47 @@ def login():
     form = LoginForm()
     if form.validate_on_submit():
         userFound = Users.query.filter_by(username=form.username.data).first()
-        if userFound and security.check_password_hash(userFound.password, form.password.data):
-            login_user(loadUser(userFound.id))
-            return redirect(url_for("root.index"))
+        if userFound:
+            if security.check_password_hash(userFound.password, form.password.data):
+                login_user(loadUser(userFound.id))
+                db.session.add(LoginAttemptLogs(userFound.id, "Attempted Log in.", True))
+                db.session.commit()
+                return redirect(url_for("root.index"))
+            else:
+                db.session.add(LoginAttemptLogs(userFound.id, "Attempted Log in.", False))
+                db.session.commit()
     return render_template("login.html", form=form)
 
-@accountBp.route("/manage")
+@accountBp.route("/manage", methods=["GET", "POST"])
 @login_required
 def manage():
-    return render_template("manageAccount.html")
+    accountForm = updateAccountDetailsForm()
+    passwordForm = updatePasswordForm()
+    if accountForm.validate_on_submit():
+        try:
+            print("sheh")
+            user = Users.query.filter_by(id=current_user.id).first()
+            user.username = accountForm.username.data
+            user.email = accountForm.email.data
+            db.session.commit()
+            return redirect(url_for(".manage"))
+        except Exception as e:
+            print("ERROR: ", e)
+            db.session.rollback()
+
+    if passwordForm.validate_on_submit() and passwordForm.submit.data:
+        if security.check_password_hash(current_user.password, passwordForm.currentPassword.data):
+            try:
+                user = Users.query.filter_by(id=current_user.id).first()
+                user.password = security.generate_password_hash(passwordForm.newPassword.data)
+                db.session.commit()
+            except Exception as e:
+                print("ERROR", e)
+                db.session.rollback()
+        return redirect(url_for(".manage"))
+    accountForm.email.data = current_user.email
+    accountForm.username.data = current_user.username
+    return render_template("manageAccount.html", accountForm=accountForm, passwordForm=passwordForm)
 
 @accountBp.route("/debts", methods=["GET", "POST"])
 @login_required
@@ -59,6 +94,7 @@ def debts():
         amount = debt.owed
         billId = debt.bill.id
         db.session.add(Payments(billId, payerId, payeeId, amount, evidence))
+        db.session.add(BillLog(current_user.id, billId,f"Paid £{amount}"))
         if payeeId != current_user.id:
             db.session.add(Notifications(debt.bill.groupId, payeeId, current_user.id, "bill payment"))
         db.session.commit()
@@ -67,6 +103,22 @@ def debts():
     
     return render_template("debts.html", debts=Debtors.query.filter_by(userId=current_user.id).all(), form=form, \
                            debtStatuses=debtStatuses)
+
+@accountBp.route("/recover", methods=["POST", "GET"])
+def recover():
+    form = RecoverAccountForm()
+    if form.validate_on_submit():
+        ... # this needs to send the code to the email, pass it into something that can store it etc
+        return redirect(url_for("account.reset"))
+    return render_template("recover.html", form=form)
+
+@accountBp.route("/reset", methods=["POST", "GET"])
+def reset():
+    form = RecoverResetPasswordForm()
+    if form.validate_on_submit():
+        ... # needs to check the code and then reset the password if correct
+        return redirect(url_for("account.login"))
+    return render_template("reset.html", form=form)
 
 
 @accountBp.route("/logout")

@@ -2,7 +2,7 @@ from flask import Blueprint, render_template, redirect, url_for, request, jsonif
 from flask_login import login_required, current_user
 from werkzeug import security
 from configuration import db
-from models import Groups, GroupMembers, Notifications
+from models import Groups, GroupMembers, Notifications, LoginAttemptLogs
 rootBp = Blueprint("root", __name__, url_prefix="")
 
 @rootBp.route("/", methods=["GET", "POST"])
@@ -10,63 +10,12 @@ rootBp = Blueprint("root", __name__, url_prefix="")
 def index():
     usersGroups = []
     for group in GroupMembers.query.filter_by(userId=current_user.id):
-        print(Groups.query.filter_by(id=group.groupId).first().name) # temp
+        #print(Groups.query.filter_by(id=group.groupId).first().name) # temp
         usersGroups.append(Groups.query.filter_by(id=group.groupId).first())
     if current_user.username == "admin":
         for group in Groups.query.all():
             usersGroups.append(group)
     return render_template("index.html", groups=usersGroups)
-
-# these two group creation and join routes are temporary, they will be replaced with a pop up form.
-"""
-change this to the proper flask-wtf form methods, and also implement ajax for this
-"""
-@rootBp.route("/createGroup", methods=["GET", "POST"])
-@login_required
-def createGroup():
-    if request.method == "GET":
-        return render_template("createGroupTemp.html")
-    else:
-        try:
-            groupName = request.form["groupName"]
-            groupPassword = security.generate_password_hash(request.form["groupPassword"])
-            db.session.add(Groups(groupName, groupPassword))
-
-            db.session.add(GroupMembers(current_user.id, Groups.query.filter_by(name=groupName).first().id))
-            db.session.commit()
-            print("group added!")
-            return redirect(url_for(".index"))
-        except Exception as e:
-            print(e)
-            db.session.rollback()
-            return render_template("createGroupTemp.html")
-
-"""
-change this to the proper flask-wtf form methods, and also implement ajax for this
-"""
-@rootBp.route("/joinGroup", methods=["GET", "POST"])
-@login_required
-def joinGroup():
-    if request.method == "GET":
-        return render_template("joinGroupTemp.html")
-    else:
-        try:
-            group = Groups.query.filter_by(name=request.form["groupName"]).first()
-            if group:
-                password = request.form["groupPassword"]
-                if security.check_password_hash(group.groupPassword, password):
-                    db.session.add(GroupMembers(current_user.id, group.id))
-                    db.session.commit()
-                    print("user added")
-                    return redirect(url_for(".joinGroup"))
-            else:
-                print("no gorup")
-                return render_template("joinGroupTemp.html")
-        except Exception as e:
-            print("cant add")
-            print(e)
-            db.session.rollback()
-            return render_template("joinGroupTemp.html")
         
 @rootBp.route("/notification/dismiss", methods=["POST"])
 def dismissNoti():
@@ -84,5 +33,12 @@ def dismissNoti():
     numOfNotis = len(Notifications.query.filter_by(userId=userId).all())
     print(numOfNotis)
     return jsonify({"ok": True, "numOfNotis": numOfNotis})
+
+@rootBp.route("/logs")
+@login_required
+def logs():
+    if current_user.username != "admin":
+        return redirect(url_for(".index"))
+    return render_template("loginLogs.html", logs=LoginAttemptLogs.query.all())
     
         

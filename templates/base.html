@@ -70,6 +70,9 @@
 
 
             {% endif %}
+            {% if current_user.username == "admin" %}
+                <button class="btn"><a href="{{url_for('root.logs')}}" >View account logs</a></button>
+            {% endif %}
         </nav>
         {% block content %}
         {% endblock %}
@@ -84,11 +87,22 @@
 
                 <div class="modal-body">
                     <form method="POST" action="group/create" class="groupForm">
-                        {{createGroupForm.groupName.label}}
-                        {{createGroupForm.groupName()}}
-                        {{createGroupForm.groupPassword.label}}
-                        {{createGroupForm.groupPassword()}}
-                        {{createGroupForm.groupName.label}}
+                        {{ createGroupForm.hidden_tag() }}
+                        <div>
+                            {{createGroupForm.groupName.label}}
+                            {{createGroupForm.groupName()}}
+                        </div>
+                        <div>
+                            {{createGroupForm.groupPassword.label}}
+                            {{createGroupForm.groupPassword()}}
+                        </div>
+                        <div>
+                            {{createGroupForm.confirmGroupPassword.label}}
+                            {{createGroupForm.confirmGroupPassword()}}
+                        </div>
+                        <div class="errors" style="color: red;">
+
+                        </div>
                         {{createGroupForm.submit()}}
 
 
@@ -108,16 +122,19 @@
                 </div>
 
                 <div class="modal-body">
-                    <a href="{{url_for('root.joinGroup')}}">Join group</a>
                     <form method="POST" action="/group/join" class="groupForm">
-                        {{joinGroupForm.groupName.label}}
-                        {{joinGroupForm.groupName()}}
-                        {{joinGroupForm.groupPassword.label}}
-                        {{joinGroupForm.groupPassword()}}
-                        {{joinGroupForm.groupName.label}}
-                        {{joinGroupForm.submit()}}
-
-
+                        {{ joinGroupForm.hidden_tag() }}
+                        <div>
+                            {{joinGroupForm.groupName.label}}
+                            {{joinGroupForm.groupName()}}
+                        </div>
+                        <div>
+                            {{joinGroupForm.groupPassword.label}}
+                            {{joinGroupForm.groupPassword()}}
+                        </div>
+                        <div>
+                            {{joinGroupForm.submit()}}
+                        </div>
                     </form>
                 </div>
 

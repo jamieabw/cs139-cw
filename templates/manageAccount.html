@@ -6,11 +6,27 @@
 <h2>Account</h2>
 <hr>
 <h3>Account details:</h3>
-<p>Username: {{current_user.username}}</p>
-<p>Email: {{current_user.email}}</p>
+<form method="POST">
+    {{accountForm.hidden_tag()}}
+    {{accountForm.email.label}}
+    {{accountForm.email()}}
+    {{accountForm.username.label}}
+    {{accountForm.username()}}
+    {{accountForm.submit()}}
+</form>
 <p>Created: {{current_user.createdAt}}</p>
 <hr>
 <h3>Change password</h3>
+<form method="POST">
+    {{passwordForm.hidden_tag()}}
+    {{passwordForm.currentPassword.label}}
+    {{passwordForm.currentPassword()}}
+    {{passwordForm.newPassword.label}}
+    {{passwordForm.newPassword()}}
+    {{passwordForm.confirmNewPassword.label}}
+    {{passwordForm.confirmNewPassword()}}
+    {{passwordForm.submit()}}
+</form>
 <hr>
 <a href="{{url_for('account.logout')}}"><button>Logout</button></a>
 {% endblock %}

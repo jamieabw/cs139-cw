@@ -52,7 +52,26 @@
     {% endfor %}
 
 </div>
+{% if current_user.username == "admin" %}
+    <h2>Bill logs</h2>
+    <hr>
+    <div class="grid">
+        <div class="row">
+            <div class="col">User</div>
+            <div class="col-6">Log information</div>
+            <div class="col">At</div>
+        </div>
+        {% for log in logs %}
+            <div class="row">
+                <div class="col">{{log.user.username}}</div>
+                <div class="col-6">{{log.information}}</div>
+                <div class="col">{{log.createdAt}}</div>
 
+            </div>
+        {% endfor %}
+
+    </div>
+{% endif %}
 <div class="modal fade" id="editBill" tabindex="-1" aria-hidden="true">
             <div class="modal-dialog">
                 <div class="modal-content">
