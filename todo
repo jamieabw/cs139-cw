@@ -1,8 +1,4 @@
 - add ajax for sending settle requests
-- log archiving bills
-- display different section for achiving bills
-- archived bills can not have payments submitted, already present payments cannot be acknowledged or rejected until
-the bill has been unarchived
 - style it nicely with css
 - add nicer interactivity with JS
 - record video & test

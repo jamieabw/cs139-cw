@@ -12,6 +12,10 @@ accountBp = Blueprint("account", __name__, url_prefix="/account")
 def loadUser(userId):
     return db.session.get(Users, int(userId))
 
+
+"""
+page for registering a new user
+"""
 @accountBp.route("/register", methods=["GET", "POST"])
 def register():
     form = RegisterForm()
@@ -30,7 +34,9 @@ def register():
     return render_template("register.html", form=form)
 
     
-
+"""
+page for logging into an existing user's account
+"""
 @accountBp.route("/login", methods=["GET", "POST"])
 def login():
     form = LoginForm()
@@ -47,6 +53,9 @@ def login():
                 db.session.commit()
     return render_template("login.html", form=form)
 
+"""
+page for managing account such as changing details, logging out, changing password
+"""
 @accountBp.route("/manage", methods=["GET", "POST"])
 @login_required
 def manage():
@@ -78,6 +87,9 @@ def manage():
     accountForm.username.data = current_user.username
     return render_template("manageAccount.html", accountForm=accountForm, passwordForm=passwordForm)
 
+"""
+a page to display the current debts the user owes
+"""
 @accountBp.route("/debts", methods=["GET", "POST"])
 @login_required
 def debts():
@@ -105,6 +117,9 @@ def debts():
     return render_template("debts.html", debts=Debtors.query.filter_by(userId=current_user.id).all(), form=form, \
                            debtStatuses=debtStatuses)
 
+"""
+the page which contains the form for the user to put the email of the account they want to recover
+"""
 @accountBp.route("/recover", methods=["POST", "GET"])
 def recover():
     form = RecoverAccountForm()
@@ -114,6 +129,10 @@ def recover():
         return redirect(url_for("account.reset"))
     return render_template("recover.html", form=form)
 
+
+"""
+page which contains the form for the code, and changing their password
+"""
 @accountBp.route("/reset", methods=["POST", "GET"])
 def reset():
     if not "email" in session:
@@ -140,6 +159,10 @@ def reset():
         sendRecoveryCode(email)
     return render_template("reset.html", form=form)
 
+
+"""
+generates 6 random digits and concatenates them together, sends them in a n email to the user to recover their account
+"""
 def sendRecoveryCode(email):
     code = ""
     for i in range(6):

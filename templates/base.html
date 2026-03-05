@@ -122,7 +122,7 @@
                 </div>
 
                 <div class="modal-body">
-                    <form method="POST" action="/group/join" class="groupForm">
+                    <form method="POST" action="{{url_for('group.joinGroup')}}" class="groupForm">
                         {{ joinGroupForm.hidden_tag() }}
                         <div>
                             {{joinGroupForm.groupName.label}}
@@ -131,6 +131,9 @@
                         <div>
                             {{joinGroupForm.groupPassword.label}}
                             {{joinGroupForm.groupPassword()}}
+                        </div>
+                        <div class="errors" style="color: red;">
+
                         </div>
                         <div>
                             {{joinGroupForm.submit()}}

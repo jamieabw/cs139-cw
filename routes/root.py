@@ -5,6 +5,9 @@ from configuration import db
 from models import Groups, GroupMembers, Notifications, LoginAttemptLogs
 rootBp = Blueprint("root", __name__, url_prefix="")
 
+"""
+either shows the users what groups theyre apart of, or redirects them to the login page
+"""
 @rootBp.route("/", methods=["GET", "POST"])
 @login_required
 def index():
@@ -40,5 +43,9 @@ def logs():
     if current_user.username != "admin":
         return redirect(url_for(".index"))
     return render_template("loginLogs.html", logs=LoginAttemptLogs.query.all())
+
+@rootBp.route("/credits")
+def credits():
+    return render_template("credits.html")
     
         

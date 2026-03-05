@@ -40,4 +40,7 @@ modal.addEventListener("submit", async (e) =>
     // need to fix bug with proportion and owed displaying differently (50, instead of 50.00), either is fine but needs to be consistent
     debtorsGrid.appendChild(row);
     }
+    document.querySelectorAll(".modal").forEach((m) => {
+      bootstrap.Modal.getInstance(m)?.hide();
+    })
 })

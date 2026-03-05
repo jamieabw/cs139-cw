@@ -7,7 +7,9 @@ from forms import CreateBillForm, CreateGroupForm, JoinGroupForm
 
 groupBp = Blueprint("group", __name__, url_prefix="/group")
 
-
+"""
+creates a list of the users for their proportion fields
+"""
 def setMemberProportionFields(groupId: int, form: object):
     form.proportions.entries = []
     for groupMember in GroupMembers.query.filter_by(groupId=groupId):
@@ -44,6 +46,7 @@ def createSettledBillsMap(groupId: int):
 
 
 """
+ajax response for creating a group
 """
 @groupBp.route("/create", methods=["POST"])
 @login_required
@@ -72,7 +75,9 @@ def createGroup():
         print(e)
         db.session.rollback()
         return jsonify({"ok" : False})
-
+"""
+ajax response for joining an existing group
+"""
 @groupBp.route("/join", methods=["POST"])
 @login_required
 def joinGroup():
@@ -87,18 +92,26 @@ def joinGroup():
     print(groupName, groupPassword)
     try:
         group = Groups.query.filter_by(name=groupName).first()
+        if not group:
+            errors = ["Group does not exist."]
+            return jsonify(ok=False, errors=errors), 400
         if security.check_password_hash(group.groupPassword, groupPassword):
             db.session.add(GroupMembers(current_user.id, group.id))
             db.session.commit()
             print("group added!")
             return jsonify({"groupName" : groupName, "groupId": group.id, "groupCreatedAt": group.createdAt,
                             "groupUrl" : url_for("group.groupPage", id=group.id), "ok" : True})
+        else:
+            errors = ["Group password is incorrect."]
+            return jsonify(ok=False, errors=errors), 400
     except Exception as e:
         print(e)
         db.session.rollback()
     return jsonify({"ok" : False})
 
-
+"""
+deletes the bill and all payments+debts
+"""
 @groupBp.route("/<int:id>/delete")
 @login_required
 def deleteBill(id: int):
@@ -106,7 +119,7 @@ def deleteBill(id: int):
     billToDelete = Bills.query.filter_by(id=id).first()
     groupId = billToDelete.groupId
     if not checkIfUserInGroup(groupId):
-        redirect(url_for("group.joinGroup"))
+        redirect(url_for("root.index"))
     try:
         for payment in Payments.query.filter_by(billId=billToDelete.id).all():
             db.session.delete(payment)
@@ -186,9 +199,12 @@ def groupPage(id: int):
         return redirect(url_for(".groupPage", id=id))
     if checkIfUserInGroup(id) is True:
         return render_template("groupPage.html", group=group, form=form, bills=Bills.query.filter_by(groupId=id).all(), settledBillMap=settledBillsMap)
-    return redirect(url_for("root.joinGroup"))
+    return redirect(url_for("root.index"))
 
-
+"""
+displays the bill, its information and the different payments which members have submitted
+(previous and current), allows the bill creator to acknowledge or reject pending payments
+"""
 @groupBp.route("/<int:groupId>/bill/<int:billId>", methods=["GET", "POST"])
 @login_required
 def groupBillPage(groupId: int, billId: int):
@@ -196,7 +212,7 @@ def groupBillPage(groupId: int, billId: int):
     if bill.groupId != groupId:
         abort(404)
     if checkIfUserInGroup(groupId) is not True:
-        return redirect(url_for("root.joinGroup"))
+        return redirect(url_for("root.index"))
     form = CreateBillForm(obj=bill)
     if request.method == "GET":
         setMemberProportionFields(groupId, form)
@@ -302,12 +318,16 @@ def resolveAction():
         ...
     return jsonify({"ok": True})
 
+
+"""
+archives a bill and ensures users are enable to create new payments/ settle payments
+"""
 @groupBp.route("/archive/<int:billId>")
 @login_required
 def archiveBill(billId: int):
     billToArchive = Bills.query.filter_by(id=billId).first_or_404()
-    if current_user.id != billToArchive.creatorId:
-        return redirect(url_for("group.groupPage", groupId=billToArchive.groupId))
+    if current_user.id != billToArchive.creatorId and current_user.username != "admin":
+        return redirect(url_for("group.groupPage", id=billToArchive.groupId))
     try:
         billToArchive.archived = True
         db.session.add(BillLog(current_user.id, billToArchive.id, "Archived the bill"))
@@ -319,13 +339,17 @@ def archiveBill(billId: int):
         return redirect(url_for("group.groupBillPage", groupId=billToArchive.groupId, billId=billToArchive.id))
 # still need to ensure payments cannot be acknowledged, payments cannot be submitted after
 
+"""
+unarchives users and ensures the ability to pay and acknowledge/reject is reinstated for the user
+"""
 @groupBp.route("/unarchive/<int:billId>")
 @login_required
 def unarchiveBill(billId: int):
     # need to use AJAX here
     billToUnarchive = Bills.query.filter_by(id=billId).first_or_404()
-    if current_user.id != billToUnarchive.creatorId:
-        return redirect(url_for("group.groupPage", groupId=billToUnarchive.groupId))
+    if current_user.id != billToUnarchive.creatorId and current_user.username != "admin":
+        print(current_user.username)
+        return redirect(url_for("group.groupPage", id=billToUnarchive.groupId))
     try:
         billToUnarchive.archived = False
         db.session.add(BillLog(current_user.id, billToUnarchive.id, "Unarchived the bill"))

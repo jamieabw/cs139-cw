@@ -11,10 +11,15 @@ document.querySelectorAll(".groupForm").forEach((formEl) => {
         if (!responseData.ok) {
             console.log(responseData.errors)
             for (error of responseData.errors) {
-                document.querySelector(".errors").innerHTML = error
+                document.querySelectorAll(".errors").forEach((errorDiv) => {
+                    errorDiv.innerHTML = error;
+                })
             }
             return;
         }
+        document.querySelectorAll(".modal").forEach((m) => {
+            bootstrap.Modal.getInstance(m)?.hide();
+        })
         // close the parent of the parent of the form (the modal by calling .hide())
         const groupGrid = document.querySelector(".groupGrid");
         if (!groupGrid) {
