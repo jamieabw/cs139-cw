@@ -145,9 +145,17 @@ def sendRecoveryCode(email):
     for i in range(6):
         code += str(random.randint(0,9))
     # NOTE: SEND EMAIL HERE THE LOGIC WORKS
-    mail.send_message(subject="RECOVERY CODE", sender=("NOREPLY", sender), recipients=[email],
-                      body=f"Hi, here is your recovery code: {code}")
+    subject="RECOVERY CODE"
+    sender=("NOREPLY", sender)
+    recipients=[email]
+    body=f"Hi, here is your recovery code: {code}"
+    try:
+        mail.send_message(subject=subject, sender=sender, recipients=recipients,
+                        body=body)
+    except Exception as e:
+        print("ERROR: ", e)
     print(code)
+    print(subject, sender, recipients, body)
     session["code"] = code
 
 
