@@ -1,9 +1,10 @@
-from flask import Blueprint, render_template, request, redirect, url_for
+from flask import Blueprint, render_template, request, redirect, url_for, session
 from flask_login import login_user, logout_user, current_user, login_required
 from werkzeug import security
-from configuration import db, loginManager
+from configuration import db, loginManager, mail, sender
 from models import Users, Debtors, Payments, Notifications, LoginAttemptLogs, BillLog
 from forms import RegisterForm, LoginForm, SettleDebtForm, RecoverAccountForm, RecoverResetPasswordForm, updateAccountDetailsForm, updatePasswordForm
+import random
 
 accountBp = Blueprint("account", __name__, url_prefix="/account")
 
@@ -109,16 +110,46 @@ def recover():
     form = RecoverAccountForm()
     if form.validate_on_submit():
         ... # this needs to send the code to the email, pass it into something that can store it etc
+        session["email"] = form.email.data
         return redirect(url_for("account.reset"))
     return render_template("recover.html", form=form)
 
 @accountBp.route("/reset", methods=["POST", "GET"])
 def reset():
+    if not "email" in session:
+        return redirect(url_for(".recover"))
+    email = session["email"]
     form = RecoverResetPasswordForm()
     if form.validate_on_submit():
-        ... # needs to check the code and then reset the password if correct
-        return redirect(url_for("account.login"))
+        if form.code.data == session["code"]:
+            print("correct")
+            # correct code
+            try:
+                password = security.generate_password_hash(form.newPassword.data)
+                user = Users.query.filter_by(email=email).first()
+                user.password = password
+                db.session.commit()
+                session.pop("code", None)
+                session.pop("email", None)
+                return redirect(url_for("account.login"))
+            except Exception as e:
+                print("ERROR:", e)
+                db.session.rollback()
+ # needs to check the code and then reset the password if correct
+    if Users.query.filter_by(email=email).first():
+        sendRecoveryCode(email)
     return render_template("reset.html", form=form)
+
+def sendRecoveryCode(email):
+    code = ""
+    for i in range(6):
+        code += str(random.randint(0,9))
+    # NOTE: SEND EMAIL HERE THE LOGIC WORKS
+    mail.send_message(subject="RECOVERY CODE", sender=("NOREPLY", sender), recipients=[email],
+                      body=f"Hi, here is your recovery code: {code}")
+    print(code)
+    session["code"] = code
+
 
 
 @accountBp.route("/logout")

@@ -1,5 +1,5 @@
 from flask import Flask
-from configuration import db, SECRET_KEY, loginManager
+from configuration import db, SECRET_KEY, loginManager, mail
 # blueprint imports
 from routes.root import rootBp
 from routes.account import accountBp
@@ -16,10 +16,11 @@ app.register_blueprint(rootBp)"""
 """
 def create_app():
     app = Flask(__name__)
-    app.config['MAIL_SUPPRESS_SEND'] = True
+    app.config['MAIL_SUPPRESS_SEND'] = False
     app.secret_key = SECRET_KEY
     app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///cs139db.sqlite3"
     db.init_app(app)
+    mail.init_app(app)
     loginManager.init_app(app)
     loginManager.login_view = "account.login"
     app.register_blueprint(rootBp)
