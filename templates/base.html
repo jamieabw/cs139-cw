@@ -86,7 +86,7 @@
                 </div>
 
                 <div class="modal-body">
-                    <form method="POST" action="group/create" class="groupForm">
+                    <form method="POST" action="{{url_for('group.createGroup')}}" class="groupForm">
                         {{ createGroupForm.hidden_tag() }}
                         <div>
                             {{createGroupForm.groupName.label}}

@@ -26,8 +26,11 @@
     {% if current_user == bill.creator or current_user.username == "admin"%}
         <button type="button" data-bs-toggle="modal" data-bs-target="#editBill">Edit bill</button>
         <button><a href="{{ url_for('group.deleteBill', id=bill.id) }}">Delete bill</a></button>
-        <button><a href="{{url_for('group.archiveBill', id=bill.id)}}">Archive bill</a></button>
-        
+        {% if bill.archived == False %}
+            <button><a href="{{url_for('group.archiveBill', billId=bill.id)}}">Archive bill</a></button>
+        {% else %}
+            <button><a href="{{url_for('group.unarchiveBill', billId=bill.id)}}">Unarchive bill</a></button>
+        {% endif %}
     {% endif %}
 
 <h2>Payments</h2>

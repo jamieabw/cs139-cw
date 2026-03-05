@@ -16,7 +16,7 @@
     <!--need to make it so there is no settle button when archived-->
     {% for debt in debts %}
     {% set status = debtStatuses.get(debt.billId) %}
-        {% if status != "acknowledged" %}
+        {% if status != "acknowledged" and debt.bill.archived == False%}
             <div class="row">
                 <div class="col"><p>{{debt.bill.description}}</p></div>
                 <div class="col"><p>{{debt.bill.total}}</p></div>
@@ -39,7 +39,41 @@
 <hr>
 
 <!--make another section here for archived debts-->
+<h3>Archived debts</h3>
+<div class="grid debtsGrid">
+    <div class="row">
+        <div class="col"><p>Description</p></div>
+        <div class="col"><p>Total owed</p></div>
+        <div class="col"><p>What you owe</p></div>
+        <div class="col"><p>Group</p></div>
+        <div class="col"><p>Created by</p></div>
+        <div class="col"></div>
+    </div>
+    <!--need to make it so there is no settle button when archived-->
+    {% for debt in debts %}
+    {% set status = debtStatuses.get(debt.billId) %}
+        {% if status != "acknowledged" and debt.bill.archived == True %}
+            <div class="row">
+                <div class="col"><p>{{debt.bill.description}}</p></div>
+                <div class="col"><p>{{debt.bill.total}}</p></div>
+                <div class="col"><p>{{debt.owed}}</p></div>
+                <div class="col"><p>{{debt.bill.group.name}}</p></div>
+                {% if debt.bill.creator == current_user %}
+                    <div class="col"><p>You</p></div>
+                {% else %}
+                    <div class="col"><p>{{debt.bill.creator.username}}</p></div>
+                {% endif %}
+                {% if status == "pending" %}
+                    <div class="col">{{status}}</div>
+                {% else %}
+                    <div class="col"> </div>
+                {% endif %}
+            </div>
+        {% endif %}
+    {% endfor %}
+</div>
 
+<hr>
 <h3>Your settled debts</h3>
 
 <div>

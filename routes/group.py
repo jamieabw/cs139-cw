@@ -42,6 +42,9 @@ def createSettledBillsMap(groupId: int):
              settledBillMap[bill.id] = False
     return settledBillMap
 
+
+"""
+"""
 @groupBp.route("/create", methods=["POST"])
 @login_required
 def createGroup():
@@ -307,11 +310,13 @@ def archiveBill(billId: int):
         return redirect(url_for("group.groupPage", groupId=billToArchive.groupId))
     try:
         billToArchive.archived = True
+        db.session.add(BillLog(current_user.id, billToArchive.id, "Archived the bill"))
         db.session.commit()
-        return redirect(url_for("group.groupPage", groupId=billToArchive.groupId))
+        return redirect(url_for("group.groupBillPage", groupId=billToArchive.groupId, billId=billToArchive.id))
     except Exception as e:
         print("ERROR ARCHIVING: ", e)
         db.session.rollback()
+        return redirect(url_for("group.groupBillPage", groupId=billToArchive.groupId, billId=billToArchive.id))
 # still need to ensure payments cannot be acknowledged, payments cannot be submitted after
 
 @groupBp.route("/unarchive/<int:billId>")
@@ -323,8 +328,12 @@ def unarchiveBill(billId: int):
         return redirect(url_for("group.groupPage", groupId=billToUnarchive.groupId))
     try:
         billToUnarchive.archived = False
+        db.session.add(BillLog(current_user.id, billToUnarchive.id, "Unarchived the bill"))
+        db.session.commit()
+        return redirect(url_for(".groupBillPage", billId=billToUnarchive.id, groupId=billToUnarchive.groupId))
     except Exception as e:
         print("UNARCHIVING ERROR: ", e)
         db.session.rollback()
+        return redirect(url_for(".groupBillPage", billId=billToUnarchive.id, groupId=billToUnarchive.groupId))
 
 

@@ -51,6 +51,7 @@ class Bills(db.Model):
     groupId = db.Column("groupId", db.ForeignKey("groups.id"), nullable=False)
     description = db.Column("description", db.String(250))
     total = db.Column("total", db.Numeric(8,2), nullable=False)
+    archived = db.Column("archived", db.Boolean())
     createdAt = db.Column("createdAt", db.DateTime, nullable=False)
     group = db.relationship("Groups", foreign_keys=[groupId])
     creator = db.relationship("Users", foreign_keys=[creatorId])
@@ -60,6 +61,7 @@ class Bills(db.Model):
         self.groupId = groupId
         self.description = description
         self.total = total
+        self.archived = False
         self.createdAt = datetime.now()
 
 class Payments(db.Model):

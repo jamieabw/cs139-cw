@@ -18,7 +18,7 @@
         <div class="col"><p>Created by</p></div>
     </div>
     {% for bill in bills %}
-        {% if settledBillMap[bill.id] == False %}
+        {% if settledBillMap[bill.id] == False and bill.archived == False %}
             <a href="{{url_for('group.groupBillPage', groupId=group.id, billId=bill.id)}}">
                 <div class="row">
                     <div class="col"><p>{{bill.description}}</p></div>
@@ -34,7 +34,35 @@
     {% endfor %}
 </div>
 <hr>
-
+<h3>Archived bills</h3>
+<div>
+    <div class="row">
+        <div class="col"><p>Description</p></div>
+        <div class="col"><p>Cost</p></div>
+        <div class="col"><p>Created by</p></div>
+    </div>
+    <div class="row">
+        <div class="col"><p></p></div>
+        <div class="col"><p></p></div>
+        <div class="col"><p></p></div>
+    </div>
+    {% for bill in bills %}
+        {% if bill.archived == True %}
+            <a href="{{url_for('group.groupBillPage', groupId=group.id, billId=bill.id)}}">
+                <div class="row">
+                    <div class="col"><p>{{bill.description}}</p></div>
+                    <div class="col"><p>{{bill.total}}</p></div>
+                    {% if bill.creator == current_user %}
+                        <div class="col"><p>You</p></div>
+                    {% else %}
+                        <div class="col"><p>{{bill.creator.username}}</p></div>
+                    {% endif %}
+                </div>
+            </a>
+        {% endif %}
+    {% endfor %}
+</div>
+<hr>
 <h3>Previous bills</h3>
 <div>
     <div class="row">
@@ -48,7 +76,7 @@
         <div class="col"><p></p></div>
     </div>
     {% for bill in bills %}
-        {% if settledBillMap[bill.id] == True %}
+        {% if settledBillMap[bill.id] == True and bill.archived == False %}
             <a href="{{url_for('group.groupBillPage', groupId=group.id, billId=bill.id)}}">
                 <div class="row">
                     <div class="col"><p>{{bill.description}}</p></div>

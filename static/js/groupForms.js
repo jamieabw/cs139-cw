@@ -15,6 +15,7 @@ document.querySelectorAll(".groupForm").forEach((formEl) => {
             }
             return;
         }
+        // close the parent of the parent of the form (the modal by calling .hide())
         const groupGrid = document.querySelector(".groupGrid");
         if (!groupGrid) {
             return; // not on index
