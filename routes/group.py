@@ -1,7 +1,7 @@
 from flask import Blueprint, render_template, redirect, url_for, request, jsonify, abort
 from flask_login import login_required, current_user
 from werkzeug import security
-from configuration import db
+from configuration import db, mail, sender
 from models import Groups, GroupMembers, Bills, Debtors, Payments, Users, Notifications, BillLog
 from forms import CreateBillForm, CreateGroupForm, JoinGroupForm
 
@@ -128,6 +128,7 @@ and if they do, allows them to view the group page, allows dynamic group page lo
 def groupPage(id: int):
     form = CreateBillForm()
     group = Groups.query.get_or_404(id)
+    recipients = []
     settledBillsMap = createSettledBillsMap(id)
     if request.method == "GET":
         setMemberProportionFields(id, form)
@@ -159,10 +160,25 @@ def groupPage(id: int):
                 db.session.add(Debtors(newBill.id, userId, proportions[userId], total * (proportions[userId] / 100)))
                 if current_user.id != userMember.userId:
                     db.session.add(Notifications(id, userMember.userId, current_user.id, "create bill"))
+                    recipients.append(Users.query.filter_by(id=userMember.userId).first().email)
+
             db.session.commit()
             db.session.add(BillLog(current_user.id, newBill.id,f"Created a £{total} bill with description '{desc}'"))
             db.session.commit()
             print("it worked allegedly")
+            try:
+                subject="GROUP BILL NOTIFICATION"
+                senders=("NOREPLY", sender)
+                body=f"""{current_user.name} has created a new bill in {group.name}.\n
+                Total: £{newBill.total}
+                Click here to view: {url_for(".groupBillPage", billId=newBill.id, groupId=group.id)}
+                """
+                print(subject, senders, body, recipients)
+                mail.send_message(subject=subject, sender=senders, recipients=recipients,
+                            body=body)
+            except Exception as e:
+                print("EMAIL SENDING ERROR: ", e)
+
         except Exception as e:
              print(e)
              print("WRONG WO+")
