@@ -48,7 +48,7 @@
             <div class="col">{{payment.amount}}</div>
             <div class="col">Evidence</div>
             <div class="col status">{{payment.status}}</div>
-            {% if payment.status == "pending" and current_user == payment.bill.creator and payment.bill.archived != True %}
+            {% if payment.status == "pending" and (current_user == payment.bill.creator or current_user.username == "admin") and payment.bill.archived != True %}
                 <div class="row"><button data-payment-id="{{payment.id}}" data-action="ack">Acknowledge</button></div>
                 <div class="row"><button data-payment-id="{{payment.id}}" data-action="rej">Reject</button></div>
             {% endif %}

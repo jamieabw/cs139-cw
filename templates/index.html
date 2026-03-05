@@ -3,16 +3,15 @@
 {% endblock %}
 {% block content %}
 <h2>Groups</h2>
-<div class="grid groupGrid">
+<div class="groupGrid">
 {% if groups|length == 0 %}
     <p>Sorry, there are no groups to display.</p>
 {% else %}
     {% for group in groups %}
-        <div class="row groupContainer">
+        <div class="groupContainer">
             <a href="{{url_for('group.groupPage', id=group.id)}}">
-            <div class="col">{{group.name}}</div>
-            <div class="col">{{group.groupId}}</div>
-            <div class="col">{{group.createdAt}}</div>
+            <div><h3>{{group.name}}</h3></div>
+            <div>{{group.createdAt}}</div>
             </a>
         </div>
 

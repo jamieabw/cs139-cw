@@ -61,7 +61,7 @@ page for managing account such as changing details, logging out, changing passwo
 def manage():
     accountForm = updateAccountDetailsForm()
     passwordForm = updatePasswordForm()
-    if accountForm.validate_on_submit():
+    if accountForm.validate_on_submit() and accountForm.submit.data:
         try:
             print("sheh")
             user = Users.query.filter_by(id=current_user.id).first()

@@ -8,24 +8,53 @@
 <h3>Account details:</h3>
 <form method="POST">
     {{accountForm.hidden_tag()}}
-    {{accountForm.email.label}}
-    {{accountForm.email()}}
-    {{accountForm.username.label}}
-    {{accountForm.username()}}
-    {{accountForm.submit()}}
+    <div>
+        {{accountForm.email.label}}
+        {{accountForm.email()}}
+    </div>
+    {% for error in accountForm.email.errors %}
+        <p style="color:red">{{error}}</p>
+    {% endfor %}
+    <div>
+        {{accountForm.username.label}}
+        {{accountForm.username()}}
+    </div>
+    {% for error in accountForm.username.errors %}
+        <p style="color:red">{{error}}</p>
+    {% endfor %}
+    <div>
+        {{accountForm.submit()}}
+    </div>
 </form>
 <p>Created: {{current_user.createdAt}}</p>
 <hr>
 <h3>Change password</h3>
 <form method="POST">
     {{passwordForm.hidden_tag()}}
-    {{passwordForm.currentPassword.label}}
-    {{passwordForm.currentPassword()}}
-    {{passwordForm.newPassword.label}}
-    {{passwordForm.newPassword()}}
-    {{passwordForm.confirmNewPassword.label}}
-    {{passwordForm.confirmNewPassword()}}
-    {{passwordForm.submit()}}
+    <div>
+        {{passwordForm.currentPassword.label}}
+        {{passwordForm.currentPassword()}}
+    </div>
+    {% for error in passwordForm.currentPassword.errors %}
+        <p style="color:red">{{error}}</p>
+    {% endfor %}
+    <div> 
+        {{passwordForm.newPassword.label}}
+        {{passwordForm.newPassword()}}
+    </div>
+    {% for error in passwordForm.newPassword.errors %}
+        <p style="color:red">{{error}}</p>
+    {% endfor %}
+    <div>
+        {{passwordForm.confirmNewPassword.label}}
+        {{passwordForm.confirmNewPassword()}}
+    </div>
+    {% for error in passwordForm.confirmNewPassword.errors %}
+        <p style="color:red">{{error}}</p>
+    {% endfor %}
+    <div>
+        {{passwordForm.submit()}}
+    </div>
 </form>
 <hr>
 <a href="{{url_for('account.logout')}}"><button>Logout</button></a>

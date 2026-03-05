@@ -7,6 +7,9 @@
 <hr>
 <p>Description: {{group.name}}</p>
 <p>Created: {{group.createdAt}}</p>
+{% if current_user.username == "admin" %}
+    <button><a href="{{url_for('group.delete', groupId=group.id)}}">Delete group</a></button>
+{% endif %}
 <hr>
 <button type="button" data-bs-toggle="modal" data-bs-target="#createBill">Create new bill</button>
 <hr>

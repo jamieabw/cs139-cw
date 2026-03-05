@@ -134,6 +134,29 @@ def deleteBill(id: int):
         db.session.rollback()
     return redirect(url_for(".groupPage", id=groupId))
 
+@groupBp.route("/delete/<int:groupId>")
+@login_required
+def delete(groupId: int):
+    if current_user.username != "admin":
+        return redirect(url_for("root.index"))
+    groupToDelete = Groups.query.filter_by(id=groupId).first_or_404()
+    try:
+        for bill in Bills.query.filter_by(groupId=groupId).all():
+            for debtor in Debtors.query.filter_by(billId=bill.id).all():
+                db.session.delete(debtor)
+            for payment in Payments.query.filter_by(billId=bill.id).all():
+                db.session.delete(payment)
+            db.session.delete(bill)
+        for groupMember in GroupMembers.query.filter_by(groupId=groupId).all():
+            db.session.delete(groupMember)
+        for notification in Notifications.query.filter_by(groupId=groupId).all():
+                db.session.delete(notification)
+        db.session.delete(groupToDelete)
+        db.session.commit()
+        return redirect(url_for("root.index"))
+    except Exception as e:
+        print("ERROR DELETING GROUP: ", e)
+        return redirect(url_for(".groupPage", id=groupId))
 
 """
 checks if a group exists, if it doesn't then returns a 404, else it checks if the user belongs to the group

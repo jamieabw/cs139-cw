@@ -17,7 +17,8 @@ def index():
         usersGroups.append(Groups.query.filter_by(id=group.groupId).first())
     if current_user.username == "admin":
         for group in Groups.query.all():
-            usersGroups.append(group)
+            if group not in usersGroups:
+                usersGroups.append(group)
     return render_template("index.html", groups=usersGroups)
         
 @rootBp.route("/notification/dismiss", methods=["POST"])
