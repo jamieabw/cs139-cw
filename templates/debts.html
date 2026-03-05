@@ -13,6 +13,7 @@
         <div class="col"><p>Created by</p></div>
         <div class="col"></div>
     </div>
+    <!--need to make it so there is no settle button when archived-->
     {% for debt in debts %}
     {% set status = debtStatuses.get(debt.billId) %}
         {% if status != "acknowledged" %}
@@ -36,6 +37,8 @@
     {% endfor %}
 </div>
 <hr>
+
+<!--make another section here for archived debts-->
 
 <h3>Your settled debts</h3>
 

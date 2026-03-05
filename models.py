@@ -145,7 +145,7 @@ class BillLog(db.Model):
         self.billId = billId
         self.createdAt = datetime.now()
     """
-    bill log for creating, payment, editing
+    bill log for creating, payment, editing, -archiving, -unarchiving -prefix is need to add
     """
 
 class LoginAttemptLogs(db.Model):

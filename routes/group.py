@@ -299,3 +299,32 @@ def resolveAction():
         ...
     return jsonify({"ok": True})
 
+@groupBp.route("/archive/<int:billId>")
+@login_required
+def archiveBill(billId: int):
+    billToArchive = Bills.query.filter_by(id=billId).first_or_404()
+    if current_user.id != billToArchive.creatorId:
+        return redirect(url_for("group.groupPage", groupId=billToArchive.groupId))
+    try:
+        billToArchive.archived = True
+        db.session.commit()
+        return redirect(url_for("group.groupPage", groupId=billToArchive.groupId))
+    except Exception as e:
+        print("ERROR ARCHIVING: ", e)
+        db.session.rollback()
+# still need to ensure payments cannot be acknowledged, payments cannot be submitted after
+
+@groupBp.route("/unarchive/<int:billId>")
+@login_required
+def unarchiveBill(billId: int):
+    # need to use AJAX here
+    billToUnarchive = Bills.query.filter_by(id=billId).first_or_404()
+    if current_user.id != billToUnarchive.creatorId:
+        return redirect(url_for("group.groupPage", groupId=billToUnarchive.groupId))
+    try:
+        billToUnarchive.archived = False
+    except Exception as e:
+        print("UNARCHIVING ERROR: ", e)
+        db.session.rollback()
+
+
