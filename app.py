@@ -16,7 +16,7 @@ app.register_blueprint(rootBp)"""
 """
 def create_app():
     app = Flask(__name__)
-    app.config['MAIL_SUPPRESS_SEND'] = False
+    app.config['MAIL_SUPPRESS_SEND'] = True
     app.secret_key = SECRET_KEY
     app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///cs139db.sqlite3"
     db.init_app(app)

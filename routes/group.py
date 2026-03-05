@@ -169,10 +169,7 @@ def groupPage(id: int):
             try:
                 subject="GROUP BILL NOTIFICATION"
                 senders=("NOREPLY", sender)
-                body=f"""{current_user.username} has created a new bill in {group.name}.\n
-                Total: £{newBill.total}
-                Click here to view: {url_for(".groupBillPage", billId=newBill.id, groupId=group.id)}
-                """
+                body=f"""{current_user.username} has created a new bill in {group.name}.\nTotal: £{newBill.total}\nDescription: {newBill.description}"""
                 print(subject, senders, body, recipients)
                 mail.send_message(subject=subject, sender=senders, recipients=recipients,
                             body=body)
