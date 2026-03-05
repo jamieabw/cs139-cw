@@ -5,8 +5,10 @@
 {% block content %}
 <h2>{{group.name}}</h2>
 <hr>
-<p>Description: {{group.name}}</p>
 <p>Created: {{group.createdAt}}</p>
+<p>
+    Members:
+</p>
 {% if current_user.username == "admin" %}
     <button><a href="{{url_for('group.delete', groupId=group.id)}}">Delete group</a></button>
 {% endif %}
