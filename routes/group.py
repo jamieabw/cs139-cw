@@ -169,7 +169,7 @@ def groupPage(id: int):
             try:
                 subject="GROUP BILL NOTIFICATION"
                 senders=("NOREPLY", sender)
-                body=f"""{current_user.name} has created a new bill in {group.name}.\n
+                body=f"""{current_user.username} has created a new bill in {group.name}.\n
                 Total: £{newBill.total}
                 Click here to view: {url_for(".groupBillPage", billId=newBill.id, groupId=group.id)}
                 """
