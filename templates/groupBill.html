@@ -46,7 +46,7 @@
         <div class="row paymentRow">
             <div class="col">{{payment.user.username}}</div>
             <div class="col">{{payment.amount}}</div>
-            <div class="col">Evidence</div>
+            <div class="col"><img src="{{url_for('root.image', paymentId=payment.id)}}" alt="evidence for payment id: {{payment.id}}" style="max-width: 10vw; max-height: 10vh;"></div>
             <div class="col status">{{payment.status}}</div>
             {% if payment.status == "pending" and (current_user == payment.bill.creator or current_user.username == "admin") and payment.bill.archived != True %}
                 <div class="row"><button data-payment-id="{{payment.id}}" data-action="ack">Acknowledge</button></div>
@@ -112,9 +112,9 @@
                                 </div>
                                 {% endfor %}
                                 <span class="totalPercent">Total: </span>%
-                                {% for error in form.proportions.errors %}
-                                    <p style="color:red">{{ error }}</p>
-                                {% endfor %}
+                                <div class="errors" style="color: red;">
+
+                                </div>
                             </div>                          
                         </div>
                         <label style="color: red">Warning: editing the bill will delete all previous payments.</label>

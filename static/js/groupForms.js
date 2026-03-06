@@ -26,14 +26,11 @@ document.querySelectorAll(".groupForm").forEach((formEl) => {
             return; // not on index
         }
         const row = document.createElement("div");
-        row.className = "row groupContainer";
+        row.className = "groupContainer";
         row.innerHTML = `<a href=${responseData.groupUrl}>
-                <div class="col">${responseData.groupName}</div>
-                <div class="col">${responseData.groupId}</div>
-                <div class="col">${responseData.groupCreatedAt}</div>
+                <div><h3>${responseData.groupName}</h3></div>
+                <div">${responseData.groupCreatedAt}</div>
                 </a>`
-
-
         groupGrid.appendChild(row);
 
     })

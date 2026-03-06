@@ -1,4 +1,5 @@
 - add ajax for sending settle requests
+- display the image
 - style it nicely with css
 - add nicer interactivity with JS
 - record video & test

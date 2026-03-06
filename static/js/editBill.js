@@ -10,8 +10,14 @@ modal.addEventListener("submit", async (e) =>
   });
   const responseData = await response.json();
   if (!responseData.ok) {
-    console.log("error", responseData);
+    for (error of responseData.errors) {
+                document.querySelectorAll(".errors").forEach((errorDiv) => {
+                    errorDiv.innerHTML = error;
+                })
+            }
+            return;
   }
+  
   const billId = responseData.billId;
   console.log(billId);
   document.querySelectorAll(".paymentRow").forEach((row) => row.remove());

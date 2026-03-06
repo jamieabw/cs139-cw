@@ -1,8 +1,8 @@
-from flask import Blueprint, render_template, redirect, url_for, request, jsonify
+from flask import Blueprint, render_template, redirect, url_for, request, jsonify, Response
 from flask_login import login_required, current_user
 from werkzeug import security
 from configuration import db
-from models import Groups, GroupMembers, Notifications, LoginAttemptLogs
+from models import Groups, GroupMembers, Notifications, LoginAttemptLogs, Payments
 rootBp = Blueprint("root", __name__, url_prefix="")
 
 """
@@ -48,5 +48,11 @@ def logs():
 @rootBp.route("/credits")
 def credits():
     return render_template("credits.html")
+
+@rootBp.route("/image/<int:paymentId>")
+def image(paymentId):
+    ... # returns the image
+    image = Payments.query.filter_by(id=paymentId).first_or_404().evidence
+    return Response(image)
     
         

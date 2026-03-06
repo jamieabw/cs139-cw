@@ -17,6 +17,17 @@ def setMemberProportionFields(groupId: int, form: object):
         entry["memberId"] = groupMember.userId
         entry["memberName"] = Users.query.filter_by(id=groupMember.userId).first().username
         form.proportions.append_entry(entry)
+
+
+def getMembers(groupId: int):
+    members = []
+    for groupMember in GroupMembers.query.filter_by(groupId=groupId).all():
+        username = Users.query.filter_by(id=groupMember.userId).first().username
+        members.append(username)
+    return members
+
+
+
         
 
 
@@ -168,6 +179,7 @@ def groupPage(id: int):
     form = CreateBillForm()
     group = Groups.query.get_or_404(id)
     recipients = []
+    members = getMembers(id)
     settledBillsMap = createSettledBillsMap(id)
     if request.method == "GET":
         setMemberProportionFields(id, form)
@@ -221,7 +233,7 @@ def groupPage(id: int):
              db.session.rollback()
         return redirect(url_for(".groupPage", id=id))
     if checkIfUserInGroup(id) is True:
-        return render_template("groupPage.html", group=group, form=form, bills=Bills.query.filter_by(groupId=id).all(), settledBillMap=settledBillsMap)
+        return render_template("groupPage.html", group=group, form=form, bills=Bills.query.filter_by(groupId=id).all(), settledBillMap=settledBillsMap, members=members)
     return redirect(url_for("root.index"))
 
 """
@@ -289,7 +301,11 @@ def editBill(billId: int):
         # now use proportions dict in your Debtors update
         ...
         return jsonify({"ok": True, "billId": billId})
-    return jsonify({"ok": False, "errors": form.errors})
+    if not form.validate_on_submit():
+        print(form.errors)
+        errors = list(value[0] for value in form.errors.values())
+        print(errors)
+        return jsonify(ok=False, errors=errors), 400
 
 
 
