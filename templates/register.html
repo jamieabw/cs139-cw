@@ -50,10 +50,11 @@
             {% endfor %}
             
         </div>
-        {{form.submit()}}
+        {{form.submit(class="btn btn-success")}}
 
     </form>
+    <a href="{{url_for('account.login')}}">Login to account</a>
 </div>
-<a href="{{url_for('account.login')}}">Login to account</a>
+
 
 {% endblock %}

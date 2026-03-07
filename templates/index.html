@@ -3,20 +3,23 @@
 {% endblock %}
 {% block content %}
 <h2>Groups</h2>
-<div class="groupGrid">
 {% if groups|length == 0 %}
-    <p>Sorry, there are no groups to display.</p>
+    <div class="groupGrid gap-4 d-flex flex-wrap">
+        <p class="noGroupLabel">Sorry, there are no groups to display.</p>
+    </div>
 {% else %}
-    {% for group in groups %}
-        <div class="groupContainer">
-            <a href="{{url_for('group.groupPage', id=group.id)}}">
-            <div><h3>{{group.name}}</h3></div>
-            <div>{{group.createdAt}}</div>
-            </a>
-        </div>
+        <div class="groupGrid gap-4 d-flex flex-wrap">
+            {% for group in groups %}
+                <div class="groupContainer bg-dark rounded d-flex justify-content-center flex-wrap text-nowrap-no">
+                    <a href="{{url_for('group.groupPage', id=group.id)}}">
+                    <div class="text-wrap"><h3>{{group.name}}</h3></div>
+                    <div><p>{{group.createdAt}}</p></div>
+                    </a>
+                </div>
 
-    {% endfor %}
+            {% endfor %}
+        </div>
 {% endif %}
-</div>
+
 
 {% endblock %}

@@ -1,6 +1,6 @@
 body {
     color: whitesmoke;
-    background-color: rgb(50, 50, 50);
+    background-color: rgb(73, 73, 73);
 }
 
 a {
@@ -8,6 +8,18 @@ a {
     text-decoration: none;
 }
 
-.groupContainer {
-    background-color: rgb(30, 29, 29);
+
+.groupContainer > * {
+    text-align: center;
+    flex-wrap: wrap;
+}
+
+.notificationSection .dropdown-item {
+    background-color: transparent;
+}
+
+.notificationSection .dropdown-item:hover,
+.notificationSection .dropdown-item:focus,
+.notificationSection .dropdown-item:active {
+    background-color: transparent;
 }

@@ -10,10 +10,10 @@
     Members: {{members}}
 </p>
 {% if current_user.username == "admin" %}
-    <button><a href="{{url_for('group.delete', groupId=group.id)}}">Delete group</a></button>
+    <button class="btn btn-danger" onclick="window.location.href=`{{url_for('group.delete', groupId=group.id)}}`"><a href="{{url_for('group.delete', groupId=group.id)}}">Delete group</a></button>
 {% endif %}
 <hr>
-<button type="button" data-bs-toggle="modal" data-bs-target="#createBill">Create new bill</button>
+<button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#createBill">Create new bill</button>
 <hr>
 <h3>Current bills</h3>
 <div class="grid">
@@ -127,14 +127,14 @@
                             </div>
                             <div>
                                 {{form.proportions.label}}
-                                <button onclick="splitEvenly()" type="button">Split evenly</button>
+                                <button onclick="splitEvenly()" type="button" class="btn btn-dark">Split evenly</button>
                                 {% for proportion in form.proportions %}
                                 <div>
                                     <span>{{proportion.memberName.data}}</span>
                                     <span class="percent" data-for="{{proportion.proportion.id}}"></span>%
                                     {{proportion.memberId()}}
                                     {{proportion.memberName()}}
-                                    <div>{{proportion.proportion(oninput="update(this)")}}</div>
+                                    <div>{{proportion.proportion(oninput="update(this)", class="form-range")}}</div>
                                 </div>
                                 {% endfor %}
                                 <span class="totalPercent">Total: </span>%
@@ -143,7 +143,7 @@
                                 {% endfor %}
                             </div>                  
                         </div>
-                        {{form.submit()}}
+                        {{form.submit(class="btn btn-success")}}
 
                     </form>
                 </div>

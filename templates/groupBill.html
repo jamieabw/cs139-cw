@@ -3,7 +3,7 @@
 {% endblock %}
 
 {% block content %}
-<p>{{bill.id}}</p>
+<p>Creator: {{bill.creator.username}}</p>
 
 <h2>Bill split</h2>
 <hr>
@@ -24,13 +24,15 @@
 
 </div>
     {% if current_user == bill.creator or current_user.username == "admin"%}
-        <button type="button" data-bs-toggle="modal" data-bs-target="#editBill">Edit bill</button>
-        <button><a href="{{ url_for('group.deleteBill', id=bill.id) }}">Delete bill</a></button>
+        <button class="btn btn-light" data-bs-toggle="modal" data-bs-target="#editBill">Edit bill</button>
         {% if bill.archived == False %}
-            <button><a href="{{url_for('group.archiveBill', billId=bill.id)}}">Archive bill</a></button>
+            <button class="btn btn-warning" onclick="window.location.href=`{{ url_for('group.archiveBill', billId=bill.id) }}`">Archive bill</button>
         {% else %}
-            <button><a href="{{url_for('group.unarchiveBill', billId=bill.id)}}">Unarchive bill</a></button>
+            <button class="btn btn-warning" onclick="window.location.href=`{{ url_for('group.unarchiveBill', billId=bill.id) }}`">Unarchive bill</button>
+
         {% endif %}
+        <button class="btn btn-danger" onclick="window.location.href=`{{ url_for('group.deleteBill', id=bill.id) }}`">Delete bill</button>
+
     {% endif %}
 
 <h2>Payments</h2>
@@ -49,8 +51,8 @@
             <div class="col"><img src="{{url_for('root.image', paymentId=payment.id)}}" alt="evidence for payment id: {{payment.id}}" style="max-width: 10vw; max-height: 10vh;"></div>
             <div class="col status">{{payment.status}}</div>
             {% if payment.status == "pending" and (current_user == payment.bill.creator or current_user.username == "admin") and payment.bill.archived != True %}
-                <div class="row"><button data-payment-id="{{payment.id}}" data-action="ack">Acknowledge</button></div>
-                <div class="row"><button data-payment-id="{{payment.id}}" data-action="rej">Reject</button></div>
+                <div class="row"><button class="btn btn-success" data-payment-id="{{payment.id}}" data-action="ack">Acknowledge</button></div>
+                <div class="row"><button class="btn btn-danger" data-payment-id="{{payment.id}}" data-action="rej">Reject</button></div>
             {% endif %}
         </div>
     {% endfor %}
@@ -101,7 +103,7 @@
                             {% endfor %} 
                             <div>
                                 {{form.proportions.label}}
-                                <button onclick="splitEvenly()" type="button">Split evenly</button>
+                                <button onclick="splitEvenly()" type="button" class="btn btn-dark">Split evenly</button>
                                 {% for proportion in form.proportions %}
                                 <div>
                                     <span>{{proportion.memberName.data}}</span>
@@ -118,7 +120,7 @@
                             </div>                          
                         </div>
                         <label style="color: red">Warning: editing the bill will delete all previous payments.</label>
-                        {{form.submit()}}
+                        {{form.submit(class="btn btn-success")}}
 
                     </form>
                 </div>

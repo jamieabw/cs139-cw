@@ -23,7 +23,7 @@
         <p style="color:red">{{error}}</p>
     {% endfor %}
     <div>
-        {{accountForm.submit()}}
+        {{accountForm.submit(class="btn btn-success")}}
     </div>
 </form>
 <p>Created: {{current_user.createdAt}}</p>
@@ -53,9 +53,9 @@
         <p style="color:red">{{error}}</p>
     {% endfor %}
     <div>
-        {{passwordForm.submit()}}
+        {{passwordForm.submit(class="btn btn-success")}}
     </div>
 </form>
 <hr>
-<a href="{{url_for('account.logout')}}"><button>Logout</button></a>
+<button class="btn btn-danger" onclick="window.location.href=`{{ url_for('account.logout') }}`">Logout</button>
 {% endblock %}

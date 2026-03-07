@@ -30,7 +30,7 @@
                 {% if status == "pending" %}
                     <div class="col">{{status}}</div>
                 {% else %}
-                    <div class="col"><button type="button" data-bs-toggle="modal" data-bs-target="#settleDebt" data-bill-id="{{debt.billId}}">Settle</button></div>
+                    <div class="col"><button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#settleDebt" data-bill-id="{{debt.billId}}">Settle</button></div>
                 {% endif %}
             </div>
         {% endif %}

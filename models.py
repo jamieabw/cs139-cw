@@ -71,17 +71,19 @@ class Payments(db.Model):
     payeeId = db.Column("payeeId", db.ForeignKey("users.id"), nullable=False)
     amount = db.Column("amount", db.Numeric(8,2), nullable=False)
     createdAt = db.Column("createdAt", db.DateTime, nullable=False)
-    evidence = db.Column("evidence", db.LargeBinary, nullable=True) # temp
+    evidence = db.Column("evidence", db.LargeBinary, nullable=False)
+    evidenceMIME = db.Column("evidenceMIME", db.String(30), nullable=False)
     status = db.Column("status", db.String(15)) # pending, acknowledged, rejected
     bill = db.relationship("Bills", foreign_keys=[billId])
     user = db.relationship("Users", foreign_keys=[payerId])
 
-    def __init__(self, billId, payerId, payeeId, amount, evidence):
+    def __init__(self, billId, payerId, payeeId, amount, evidence, evidenceMIME):
         self.billId = billId
         self.payerId = payerId
         self.payeeId = payeeId
         self.amount = amount
         self.evidence = evidence
+        self.evidenceMIME = evidenceMIME
         self.status = "pending"
         self.createdAt = datetime.now()
 

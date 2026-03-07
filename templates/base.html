@@ -17,10 +17,10 @@
             {% if current_user.is_authenticated %}
                 <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown">Add Group</button>
                 <ul class="dropdown-menu">
-                    <li><button type="button" data-bs-toggle="modal" data-bs-target="#createGroupModal">Create group</button></li>
-                    <li><button type="button" data-bs-toggle="modal" data-bs-target="#joinGroupModal">Join group</button></li>
+                    <li><button class="btn dropdown-item" data-bs-toggle="modal" data-bs-target="#createGroupModal">Create group</button></li>
+                    <li><button class="btn dropdown-item" data-bs-toggle="modal" data-bs-target="#joinGroupModal">Join group</button></li>
                 </ul>
-                <button class="btn"><a href="{{url_for('account.debts')}}" >View debts</a></button>
+                <button class="btn" onclick="window.location.href=`{{ url_for('account.debts') }}`">View debts</button>
                 <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown">Account</button>
                 <ul class="dropdown-menu">
                     <li><a class="dropdown-item" href="{{url_for('account.manage')}}">Account settings</a></li>
@@ -37,7 +37,7 @@
 
                     <div class="overflow-auto notificationSection" style="max-height: 50vh;">
                         {% for notification in notifications %}
-                            <span class="dropdown-item text-wrap">
+                            <div class="dropdown-item text-wrap d-flex">
                                 {% if notification.type == "create bill" %}
                                     {{notification.creator.username}} created a bill in {{notification.group.name}}
 
@@ -54,8 +54,8 @@
                                     {{notification.creator.username}} has submitted a payment in {{notification.group.name}}
 
                                 {% endif %}
-                                <button data-notification-id="{{notification.id}}">Dismiss</button>
-                            </span>
+                                <button class="btn-close ms-auto" data-notification-id="{{notification.id}}"></button>
+                            </div>
                         {% endfor %}
                         {% if notifications|length == 0 %}
                             <span class="dropdown-item text-wrap">You currently have no notifications.</span>
@@ -68,7 +68,7 @@
 
             {% endif %}
             {% if current_user.username == "admin" %}
-                <button class="btn"><a href="{{url_for('root.logs')}}" >View account logs</a></button>
+                <button class="btn" onclick="window.location.href=`{{ url_for('root.logs') }}`">View account logs</button>
             {% endif %}
         </nav>
         {% block content %}
@@ -100,7 +100,7 @@
                         <div class="errors" style="color: red;">
 
                         </div>
-                        {{createGroupForm.submit()}}
+                        {{createGroupForm.submit(class="btn btn-success")}}
 
 
                     </form>
@@ -133,7 +133,7 @@
 
                         </div>
                         <div>
-                            {{joinGroupForm.submit()}}
+                            {{joinGroupForm.submit(class="btn btn-success")}}
                         </div>
                     </form>
                 </div>

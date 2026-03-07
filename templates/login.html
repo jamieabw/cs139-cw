@@ -4,24 +4,26 @@
 {% endblock %}
 
 {% block content %}
-<form method="POST">
-    {{form.hidden_tag()}}
-    <div>
-        {{form.username.label}}
-        {{form.username()}}
-        {% for error in form.username.errors %}
-            <p style="color:red">{{ error }}</p>
-        {% endfor %}
-        {{form.password.label}}
-        {{form.password()}}
-        {% for error in form.password.errors %}
-            <p style="color:red">{{ error }}</p>
-        {% endfor %}
-        
-    </div>
-    {{form.submit()}}
+<div class="container-fluid">
+    <form method="POST">
+        {{form.hidden_tag()}}
+        <div>
+            {{form.username.label}}
+            {{form.username()}}
+            {% for error in form.username.errors %}
+                <p style="color:red">{{ error }}</p>
+            {% endfor %}
+            {{form.password.label}}
+            {{form.password()}}
+            {% for error in form.password.errors %}
+                <p style="color:red">{{ error }}</p>
+            {% endfor %}
+            
+        </div>
+        {{form.submit(class="btn btn-success")}}
 
-</form>
-<a href="{{url_for('account.register')}}">Register account</a>
-<a href="{{url_for('account.recover')}}">Recover account</a>
+    </form>
+    <a href="{{url_for('account.register')}}">Register account</a>
+    <a href="{{url_for('account.recover')}}">Recover account</a>
+</div>
 {% endblock %}

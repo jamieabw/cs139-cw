@@ -149,7 +149,7 @@ def deleteBill(id: int):
 @login_required
 def delete(groupId: int):
     if current_user.username != "admin":
-        return redirect(url_for("root.index"))
+        abort(403)
     groupToDelete = Groups.query.filter_by(id=groupId).first_or_404()
     try:
         for bill in Bills.query.filter_by(groupId=groupId).all():
@@ -157,6 +157,8 @@ def delete(groupId: int):
                 db.session.delete(debtor)
             for payment in Payments.query.filter_by(billId=bill.id).all():
                 db.session.delete(payment)
+            for billLog in BillLog.query.filter_by(billId=bill.id).all():
+                db.session.delete(billLog)
             db.session.delete(bill)
         for groupMember in GroupMembers.query.filter_by(groupId=groupId).all():
             db.session.delete(groupMember)
@@ -229,7 +231,6 @@ def groupPage(id: int):
 
         except Exception as e:
              print(e)
-             print("WRONG WO+")
              db.session.rollback()
         return redirect(url_for(".groupPage", id=id))
     if checkIfUserInGroup(id) is True:
@@ -263,10 +264,8 @@ NOTE: apparently something like this will fix my worries, just need to pass the 
 @groupBp.route("/edit/<int:billId>", methods=["POST"])
 @login_required
 def editBill(billId: int):
-    form = CreateBillForm()  # binds from request.form automatically
-
+    form = CreateBillForm()
     if form.validate_on_submit():
-
         proportions = {}
         for proportion in form.proportions:
             proportions[int(proportion.memberId.data)] = float(proportion.proportion.data)
@@ -298,8 +297,6 @@ def editBill(billId: int):
             print("something went wrong:", e)
             db.session.rollback()
 
-        # now use proportions dict in your Debtors update
-        ...
         return jsonify({"ok": True, "billId": billId})
     if not form.validate_on_submit():
         print(form.errors)
@@ -315,7 +312,6 @@ AJAX backend for updating the debtors within the bill page after editing the bil
 """
 @groupBp.route("/bill/<int:billId>/debtorsData")
 def debtorsData(billId: int):
-    print("hello world")
     debtors = Debtors.query.filter_by(billId=billId).all()
     data = [{"username": d.user.username,"proportion": float(d.proportion), "owed": float(d.owed)} for d in debtors]
     print(data)
@@ -354,7 +350,6 @@ def resolveAction():
         except Exception as e:
             print(e)
             db.session.rollback()
-        ...
     return jsonify({"ok": True})
 
 

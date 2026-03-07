@@ -22,15 +22,16 @@ document.querySelectorAll(".groupForm").forEach((formEl) => {
         })
         // close the parent of the parent of the form (the modal by calling .hide())
         const groupGrid = document.querySelector(".groupGrid");
+        document.querySelector(".noGroupLabel").remove();
         if (!groupGrid) {
             return; // not on index
         }
         const row = document.createElement("div");
-        row.className = "groupContainer";
-        row.innerHTML = `<a href=${responseData.groupUrl}>
-                <div><h3>${responseData.groupName}</h3></div>
-                <div">${responseData.groupCreatedAt}</div>
-                </a>`
+        row.innerHTML = `<a href="${responseData.groupUrl}">
+                        <div class="text-wrap"><h3>${responseData.groupName}</h3></div>
+                        <div><p class="mb-0">${responseData.groupCreatedAt}</p></div>
+                        </a>`;
+        row.className = "groupContainer bg-dark rounded d-flex justify-content-center flex-wrap text-nowrap-no";
         groupGrid.appendChild(row);
 
     })

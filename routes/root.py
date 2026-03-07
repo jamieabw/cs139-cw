@@ -1,8 +1,9 @@
-from flask import Blueprint, render_template, redirect, url_for, request, jsonify, Response
+from flask import Blueprint, render_template, redirect, url_for, request, jsonify, Response, abort
 from flask_login import login_required, current_user
 from werkzeug import security
 from configuration import db
 from models import Groups, GroupMembers, Notifications, LoginAttemptLogs, Payments
+from routes.group import checkIfUserInGroup
 rootBp = Blueprint("root", __name__, url_prefix="")
 
 """
@@ -20,7 +21,11 @@ def index():
             if group not in usersGroups:
                 usersGroups.append(group)
     return render_template("index.html", groups=usersGroups)
-        
+
+
+"""
+AJAX route for dismissing a particular notification
+""" 
 @rootBp.route("/notification/dismiss", methods=["POST"])
 def dismissNoti():
     #print("I\nAM\nGETTING\n\n\n\n\nHERE")
@@ -38,21 +43,36 @@ def dismissNoti():
     print(numOfNotis)
     return jsonify({"ok": True, "numOfNotis": numOfNotis})
 
+"""
+Displays a list of the user login logs to the admin
+"""
 @rootBp.route("/logs")
 @login_required
 def logs():
     if current_user.username != "admin":
-        return redirect(url_for(".index"))
+        abort(403)
     return render_template("loginLogs.html", logs=LoginAttemptLogs.query.all())
 
+
+"""
+Credits for any used frameworks
+"""
 @rootBp.route("/credits")
 def credits():
     return render_template("credits.html")
 
+
+"""
+Returns the image to use in the evidence column of the payment grid
+"""
 @rootBp.route("/image/<int:paymentId>")
+@login_required
 def image(paymentId):
-    ... # returns the image
-    image = Payments.query.filter_by(id=paymentId).first_or_404().evidence
-    return Response(image)
+    payment = Payments.query.filter_by(id=paymentId).first_or_404()
+    if not checkIfUserInGroup(payment.bill.groupId):
+        abort(403)
+    image = payment.evidence
+    imageMIME = payment.evidenceMIME
+    return Response(image, mimetype=imageMIME)
     
         

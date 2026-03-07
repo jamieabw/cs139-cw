@@ -63,7 +63,6 @@ def manage():
     passwordForm = updatePasswordForm()
     if accountForm.validate_on_submit() and accountForm.submit.data:
         try:
-            print("sheh")
             user = Users.query.filter_by(id=current_user.id).first()
             user.username = accountForm.username.data
             user.email = accountForm.email.data
@@ -98,15 +97,15 @@ def debts():
     for payment in Payments.query.filter_by(payerId=current_user.id).all():
         debtStatuses[payment.billId] = payment.status
     print(debtStatuses)
-    if form.validate_on_submit(): # the issue here is figuring out which user is doing their debt, but i may be a retard and have just figured it out from typing this
+    if form.validate_on_submit():
         debt = db.session.get(Debtors, (int(form.billId.data), current_user.id))
-        # maybe current_user can be implemented here??, no javascript is definitely needed
         evidence = form.evidence.data.read()
+        evidenceMIME = form.evidence.data.mimetype
         payerId = current_user.id 
         payeeId = debt.bill.creator.id
         amount = debt.owed
         billId = debt.bill.id
-        db.session.add(Payments(billId, payerId, payeeId, amount, evidence))
+        db.session.add(Payments(billId, payerId, payeeId, amount, evidence, evidenceMIME))
         db.session.add(BillLog(current_user.id, billId,f"Paid £{amount}"))
         if payeeId != current_user.id:
             db.session.add(Notifications(debt.bill.groupId, payeeId, current_user.id, "bill payment"))
@@ -114,7 +113,7 @@ def debts():
         return redirect(url_for(".debts"))
 
     
-    return render_template("debts.html", debts=Debtors.query.filter_by(userId=current_user.id).all(), form=form, \
+    return render_template("debts.html", debts=Debtors.query.filter_by(userId=current_user.id).all(), form=form, 
                            debtStatuses=debtStatuses)
 
 """
@@ -182,7 +181,9 @@ def sendRecoveryCode(email):
     session["code"] = code
 
 
-
+"""
+Logs the user out, self explanatory
+"""
 @accountBp.route("/logout")
 @login_required
 def logout():
