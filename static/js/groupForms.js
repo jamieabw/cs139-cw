@@ -22,7 +22,7 @@ document.querySelectorAll(".groupForm").forEach((formEl) => {
         })
         // close the parent of the parent of the form (the modal by calling .hide())
         const groupGrid = document.querySelector(".groupGrid");
-        document.querySelector(".noGroupLabel").remove();
+        document.querySelector(".noGroupLabel")?.remove();
         if (!groupGrid) {
             return; // not on index
         }

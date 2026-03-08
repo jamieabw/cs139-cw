@@ -103,7 +103,6 @@
         {% endif %}
     {% endfor %}
 </div>
-<!--THIS NEEDS JAVASCRIPT SO DONT BOTHER YET-->
         <div class="modal fade" id="settleDebt" tabindex="-1" aria-hidden="true">
             <div class="modal-dialog">
                 <div class="modal-content">
@@ -124,7 +123,7 @@
                                 <p style="color:red">{{ error }}</p>
                             {% endfor %}                        
                         </div>
-                        {{form.submit()}}
+                        {{form.submit(class="btn btn-success")}}
 
                     </form>
                 </div>

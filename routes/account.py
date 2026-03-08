@@ -125,6 +125,7 @@ def recover():
     if form.validate_on_submit():
         ... # this needs to send the code to the email, pass it into something that can store it etc
         session["email"] = form.email.data
+        session["attempts"] = 0
         return redirect(url_for("account.reset"))
     return render_template("recover.html", form=form)
 
@@ -134,8 +135,12 @@ page which contains the form for the code, and changing their password
 """
 @accountBp.route("/reset", methods=["POST", "GET"])
 def reset():
+    session["attempts"] += 1
     if not "email" in session:
         return redirect(url_for(".recover"))
+    if session["attempts"] > 3:
+        session.pop("attempts", None)
+        return redirect(url_for(".login"))
     email = session["email"]
     form = RecoverResetPasswordForm()
     if form.validate_on_submit():
@@ -149,6 +154,7 @@ def reset():
                 db.session.commit()
                 session.pop("code", None)
                 session.pop("email", None)
+                session.pop("attempts", None)
                 return redirect(url_for("account.login"))
             except Exception as e:
                 print("ERROR:", e)

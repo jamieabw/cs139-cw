@@ -27,10 +27,6 @@ def getMembers(groupId: int):
     return members
 
 
-
-        
-
-
 """
 Checks if the user is in the group or if the user is the admin, returns true if that is the case
 """

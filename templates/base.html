@@ -5,6 +5,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
         <link rel="stylesheet" href="{{url_for('static', filename='css/customBase.css')}}">
+        <link rel="stylesheet" href="{{url_for('static', filename='css/animations.css')}}">
         <!--<link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}">-->
         {% block head %}
         {% endblock %}
@@ -29,7 +30,7 @@
 
                 <button class="btn dropdown-toggle" href="#" role="button"
                     data-bs-toggle="dropdown" aria-expanded="false">
-                    Notifications <span class="badge bg-danger notificationCounter">{{notifications|length}}</span> <!-- replace this with the len of notis-->
+                    Notifications <span class="badge bg-danger notificationCounter">{{notifications|length}}</span> 
                 </button>
 
                 <div class="dropdown-menu dropdown-menu-end p-0"

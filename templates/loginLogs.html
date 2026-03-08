@@ -7,14 +7,14 @@
     <div class="grid">
         <div class="row">
                 <div class="col">User</div>
-                <div class="col-6">Log information</div>
+                <div class="col-4">Log information</div>
                 <div class="col">Successful? </div>
                 <div class="col">At </div>
             </div>
         {% for log in logs %}
             <div class="row">
                 <div class="col">{{log.user.username}}</div>
-                <div class="col-6">{{log.information}}</div>
+                <div class="col-4">{{log.information}}</div>
                 <div class="col">{{log.successful}}</div>
                 <div class="col">{{log.createdAt}}</div>
             </div>
