@@ -7,7 +7,7 @@ from flask_login import current_user
 
 class CreateGroupForm(FlaskForm):
     groupName = StringField("Group name", validators=[DataRequired(), Length(max=50)])
-    groupPassword = PasswordField("Group password", validators=[DataRequired(), Length(max=50)])
+    groupPassword = PasswordField("Group password", validators=[DataRequired(), Length(min=6, max=50, message="Passwords must be 6-50 characters long")])
     confirmGroupPassword = PasswordField("Confirm group password", validators=[DataRequired(), Length(max=50), EqualTo("groupPassword", "Passwords must match.")])
 
     submit = SubmitField("Create")
@@ -25,7 +25,7 @@ class JoinGroupForm(FlaskForm):
 class RegisterForm(FlaskForm):
     username = StringField("Username", validators=[DataRequired(), Length(max=50)])
     email = EmailField("Email", validators=[DataRequired(), Length(max=70)])
-    password = PasswordField("Password", validators=[DataRequired(), Length(max=50)])
+    password = PasswordField("Password", validators=[DataRequired(), Length(min=6, max=50, message="Passwords must be 6-50 characters long")])
     confirmPassword = PasswordField("Confirm password", validators=[DataRequired(), Length(max=50), EqualTo("password", "Passwords must match.")])
     submit = SubmitField("Register")
 
@@ -92,7 +92,7 @@ class updateAccountDetailsForm(FlaskForm):
 
 class updatePasswordForm(FlaskForm):
     currentPassword = PasswordField("Current password", validators=[DataRequired(), Length(max=50)])
-    newPassword = PasswordField("New password", validators=[DataRequired(), Length(max=50)])
+    newPassword = PasswordField("New password", validators=[DataRequired(), Length(min=6, max=50, message="Passwords must be 6-50 characters long")])
     confirmNewPassword = PasswordField("Confirm new password", validators=[DataRequired(), Length(max=50), EqualTo("newPassword", "Passwords must match.")])
     submit = SubmitField("Update password")
 
@@ -102,6 +102,6 @@ class RecoverAccountForm(FlaskForm):
 
 class RecoverResetPasswordForm(FlaskForm):
     code = StringField("Code", validators=[DataRequired()])
-    newPassword = PasswordField("New password", validators=[DataRequired(), Length(max=50)])
+    newPassword = PasswordField("New password", validators=[DataRequired(), Length(min=6, max=50, message="Passwords must be 6-50 characters long")])
     confirmNewPassword = PasswordField("Confirm new password", validators=[DataRequired(), Length(max=50), EqualTo("newPassword", "Passwords must match.")])
     submit = SubmitField("Reset password")

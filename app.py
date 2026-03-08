@@ -1,6 +1,5 @@
 from flask import Flask, render_template
 from configuration import db, SECRET_KEY, loginManager, mail
-# blueprint imports
 from routes.root import rootBp
 from routes.account import accountBp
 from routes.group import groupBp

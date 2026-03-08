@@ -96,7 +96,6 @@ def debts():
     debtStatuses = {}
     for payment in Payments.query.filter_by(payerId=current_user.id).all():
         debtStatuses[payment.billId] = payment.status
-    print(debtStatuses)
     if form.validate_on_submit():
         debt = db.session.get(Debtors, (int(form.billId.data), current_user.id))
         evidence = form.evidence.data.read()
@@ -123,7 +122,7 @@ the page which contains the form for the user to put the email of the account th
 def recover():
     form = RecoverAccountForm()
     if form.validate_on_submit():
-        ... # this needs to send the code to the email, pass it into something that can store it etc
+ # this needs to send the code to the email, pass it into something that can store it etc
         session["email"] = form.email.data
         session["attempts"] = 0
         return redirect(url_for("account.reset"))
@@ -145,8 +144,6 @@ def reset():
     form = RecoverResetPasswordForm()
     if form.validate_on_submit():
         if form.code.data == session["code"]:
-            print("correct")
-            # correct code
             try:
                 password = security.generate_password_hash(form.newPassword.data)
                 user = Users.query.filter_by(email=email).first()
@@ -159,7 +156,6 @@ def reset():
             except Exception as e:
                 print("ERROR:", e)
                 db.session.rollback()
- # needs to check the code and then reset the password if correct
     if Users.query.filter_by(email=email).first():
         sendRecoveryCode(email)
     return render_template("reset.html", form=form)

@@ -20,12 +20,12 @@ document.querySelectorAll(".groupForm").forEach((formEl) => {
         document.querySelectorAll(".modal").forEach((m) => {
             bootstrap.Modal.getInstance(m)?.hide();
         })
-        // close the parent of the parent of the form (the modal by calling .hide())
         const groupGrid = document.querySelector(".groupGrid");
         document.querySelector(".noGroupLabel")?.remove();
         if (!groupGrid) {
             return; // not on index
         }
+        // add the new group to the group grid
         const row = document.createElement("div");
         row.innerHTML = `<a href="${responseData.groupUrl}">
                         <div class="text-wrap"><h3>${responseData.groupName}</h3></div>

@@ -10,7 +10,7 @@ notiSection.addEventListener("click", async (e) => {
     method: "POST",
     headers : {"Content-Type": "application/json"},
     body : JSON.stringify({notificationId : notificationId})
-  });
+  }); // sends to backen to get rid of noti
     if (!response.ok) {
         console.log("error dismissing noti");
         return;

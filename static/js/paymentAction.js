@@ -14,7 +14,6 @@ paymentsGrid.addEventListener("click", async (e) => {
     body : JSON.stringify({paymentId : paymentId, action : action})
   }) // sends the json to the toute containing the payment id and action so the backend can deal with the action
   if (response.ok) {
-    // need to remove the buttons here then change status to whatever it should be
     const row = btn.closest(".paymentRow");
     if (!row) {
         console.log("row not found");

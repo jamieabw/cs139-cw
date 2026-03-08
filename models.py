@@ -111,7 +111,6 @@ class Debtors(db.Model):
 notifcation types will be a payment noti, settlement/rejection noti, editing/creating bill noti,
 the emails will be have the same template, with just things like type and creator filled out
 
-i think this works, probably not though
 """
 class Notifications(db.Model):
     id = db.Column("id", db.Integer(), primary_key=True)
@@ -149,7 +148,7 @@ class BillLog(db.Model):
         self.billId = billId
         self.createdAt = datetime.now()
     """
-    bill log for creating, payment, editing, -archiving, -unarchiving -prefix is need to add
+    bill log for creating, payment, editing, archiving, unarchiving -prefix is need to add
     """
 
 class LoginAttemptLogs(db.Model):
@@ -171,7 +170,3 @@ class LoginAttemptLogs(db.Model):
 events to log: created account, login failure, login success, !password change, !email change, !recovery attempt
 ! - extras
 """
-
-
-
-    # will have user name, group member, or maybe user id and group id whatever

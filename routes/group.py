@@ -60,9 +60,7 @@ ajax response for creating a group
 def createGroup():
     form = CreateGroupForm()
     if not form.validate_on_submit():
-        print(form.errors)
         errors = list(value[0] for value in form.errors.values())
-        print(errors)
         return jsonify(ok=False, errors=errors), 400
     groupName = form.groupName.data
     groupPassword = form.groupPassword.data
@@ -72,10 +70,8 @@ def createGroup():
         group = Groups(groupName, groupPassword)
         db.session.add(group)
         db.session.flush() # fixes the issue with the group.id being null
-        print(current_user.id, group.id)
         db.session.add(GroupMembers(current_user.id, group.id))
         db.session.commit()
-        print("group added!")
         return jsonify({"groupName" : groupName, "groupId": group.id, "groupCreatedAt": group.createdAt,
                          "groupUrl" : url_for("group.groupPage", id=group.id), "ok" : True})
     except Exception as e:
