@@ -182,8 +182,8 @@ def sendRecoveryCode(email):
                         body=body)
     except Exception as e:
         print("ERROR: ", e)
-    print(code)
-    print(subject, senders, recipients, body)
+    #print(code)
+    #print(subject, senders, recipients, body)
     session["code"] = code
 
 
