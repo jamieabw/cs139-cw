@@ -19,6 +19,9 @@ def setMemberProportionFields(groupId: int, form: object):
         form.proportions.append_entry(entry)
 
 
+"""
+returns the list of members which belong to the group
+"""
 def getMembers(groupId: int):
     members = []
     for groupMember in GroupMembers.query.filter_by(groupId=groupId).all():
@@ -195,7 +198,6 @@ def groupPage(id: int):
             proportions[int(proportion.memberId.data)] = float(proportion.proportion.data)
 
         try:
-            print("TEST 2")
             newBill = Bills(current_user.id, id, desc, total)
             db.session.add(newBill)
             for userMember in GroupMembers.query.filter_by(groupId=id):
@@ -210,7 +212,6 @@ def groupPage(id: int):
             db.session.commit()
             db.session.add(BillLog(current_user.id, newBill.id,f"Created a £{total} bill with description '{desc}'"))
             db.session.commit()
-            print("it worked allegedly")
             try:
                 subject="GROUP BILL NOTIFICATION"
                 senders=("NOREPLY", sender)
@@ -261,7 +262,6 @@ def editBill(billId: int):
         proportions = {}
         for proportion in form.proportions:
             proportions[int(proportion.memberId.data)] = float(proportion.proportion.data)
-            print(int(proportion.memberId.data), float(proportion.proportion.data))
         description = form.description.data
         total = float(form.total.data)
         billToEdit = Bills.query.filter_by(id=billId).first_or_404()

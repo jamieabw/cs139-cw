@@ -29,3 +29,6 @@ different members to not be included in specific bills and also make specific us
 The admin account is any account which has the username 'admin' (usernames are unique). Once an account has been created with the username, multiple new
 tabs on the nav bar will be accessible, all groups will be accessible aswell as all bills. The bill logs will be contained on the pages of the specific bills.
 
+## Attribution
+For references, see credits.html (the route being /credits).
+
